@@ -16,7 +16,7 @@ import (
 	"lukechampine.com/blake3"
 )
 
-const spookyDeveloperToken string = "EsEBClcKAjE5CgZyaWdodHMKBmRlbGV0ZQoHcGF5bWVudAoFdXNhZ2UYAyIJCgcIChIDGIAIIiQKIgiBCBIdOhsKAhgACgIYAQoCGBsKAxiCCAoDGIMICgMYhAgSJAgAEiCwyxegnWquUd1RdI8oYTJR7lr-WFGB5cp9EZiBSDhhPRpAJOoVAyHElCXeZ1A2-J0-G0VYVj9QUJtY9ELcC8asSHZ8fzu-OpmXyVdR8CdDDB51fq6W5n8SNlS40sthhQQmASIiCiBCfqzP5NZUqbrLhucBcFGuRJ2Huhn8JwQ8vM7lTr0UMQ=="
+const spookyDeveloperToken string = "EsABClYKATEKBnJpZ2h0cwoGZGVsZXRlCgdwYXltZW50CgV1c2FnZRgDIgkKBwgKEgMYgAgiJAoiCIEIEh06GwoCGAAKAhgBCgIYGwoDGIIICgMYgwgKAxiECBIkCAASILKiZKevm2KmYGdiG2_XbABLuxMBC4LEvF8M5Hm2L7v0GkDTIpMh20WWTwpekxyAFrWgOe4elMXMdMaJcRxuIBY6e5no4QEWDyju0164pG_H4YiJ3VQ93T1UpGHOvSiNJQcLIiIKIMTBxP9qo6d-AezifT2zDizLUJxvm2Pxga74kavuMMYg"
 
 func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetadata, error) {
 	query := FileServerMessage_ListFileMetadataQuery_{
@@ -24,12 +24,13 @@ func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetada
 			Ids: ids,
 		},
 	}
-	listFileMetadataResponse, err := sendFileServerMessage[*ListFileMetadataResp](&query, spookyDeveloperToken)
+	listFileMetadataResponse := ListFileMetadataResp{}
+	err := sendFileServerMessage(&query, spookyDeveloperToken, &listFileMetadataResponse)
 	if err != nil {
 		return nil, err
 	}
 
-	if resp, ok := (*listFileMetadataResponse).Response.(*ListFileMetadataResp_Metadatas); ok {
+	if resp, ok := listFileMetadataResponse.Response.(*ListFileMetadataResp_Metadatas); ok {
 		fileMetas := map[string]*FileMetadata{}
 
 		for _, metaInfo := range resp.Metadatas.Metadatas {
@@ -72,15 +73,83 @@ func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetada
 		return fileMetas, nil
 	}
 
-	respErr := (*listFileMetadataResponse).Response.(*ListFileMetadataResp_Err)
+	respErr := listFileMetadataResponse.Response.(*ListFileMetadataResp_Err)
 	return nil, errors.New(respErr.Err)
 
 }
 
-func sendFileServerMessage[M proto.Message](msg isFileServerMessage_Message, token string) (*M, error) {
-	msgBin, err := encodeFileServerMessage(msg, token)
+func ListChunkMetadatas(ids []string, masterKey MasterKey) (map[string]*ChunkMetadata, error) {
+	query := FileServerMessage_ListChunkMetadataQuery_{
+		ListChunkMetadataQuery: &FileServerMessage_ListChunkMetadataQuery{
+			Ids: ids,
+		},
+	}
+	listChunkMetadataResponse := ListChunkMetadataResp{}
+	err := sendFileServerMessage(&query, spookyDeveloperToken, &listChunkMetadataResponse)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp, ok := listChunkMetadataResponse.Response.(*ListChunkMetadataResp_Metadatas); ok {
+		return resp.Metadatas.Metadatas, nil
+	}
+
+	respErr := listChunkMetadataResponse.Response.(*ListChunkMetadataResp_Err)
+	return nil, errors.New(respErr.Err)
+}
+
+func DownloadChunk(id string, fileId string, masterKey MasterKey) ([]byte, error) {
+	query := FileServerMessage_DownloadChunkQuery_{
+		DownloadChunkQuery: &FileServerMessage_DownloadChunkQuery{
+			ChunkId: id,
+		},
+	}
+	downloadChunkResponse := DownloadChunkResp{}
+	err := sendFileServerMessage(&query, spookyDeveloperToken, &downloadChunkResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp, ok := downloadChunkResponse.Response.(*DownloadChunkResp_ChunkData_); ok {
+		fileIdUUID := uuid.MustParse(fileId)
+		fileIdBin, nil := fileIdUUID.MarshalBinary()
+
+		newKeyBytes := masterKey[:]
+		newKeyBytes = append(newKeyBytes, fileIdBin...)
+		newKey := blake3.Sum256(newKeyBytes)
+
+		enc, err := chacha20poly1305.NewX(newKey[:])
+		var chunkBin []byte
+
+		if err != nil {
+			return chunkBin, err
+		}
+
+		compressedChunkBytes, err := enc.Open([]byte{}, resp.ChunkData.ChunkMetadata.Nonce, resp.ChunkData.Chunk, []byte(resp.ChunkData.ChunkMetadata.Id))
+		if err != nil {
+			return chunkBin, err
+		}
+
+		zstdDecoder, err := zstd.NewReader(bytes.NewReader(compressedChunkBytes))
+		if err != nil {
+			return chunkBin, err
+		}
+		chunkBin, err = io.ReadAll(zstdDecoder)
+		if err != nil {
+			return chunkBin, err
+		}
+
+		return chunkBin, nil
+	}
+
+	respErr := downloadChunkResponse.Response.(*DownloadChunkResp_Err)
+	return nil, errors.New(respErr.Err)
+}
+
+func sendFileServerMessage(msg isFileServerMessage_Message, token string, resp proto.Message) error {
+	msgBin, err := encodeFileServerMessage(msg, token)
+	if err != nil {
+		return err
 	}
 
 	reader := bytes.NewReader(msgBin)
@@ -107,23 +176,22 @@ func sendFileServerMessage[M proto.Message](msg isFileServerMessage_Message, tok
 
 	respBin, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer respBin.Body.Close()
 	body, err := io.ReadAll(respBin.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	// the first 4 bytes are the length of the message in uint32_le, we'll ignore that for now
 	body = body[4:]
 
 	// i <3 generics
-	resp := new(M)
-	err = proto.Unmarshal(body, *resp)
+	err = proto.Unmarshal(body, resp)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return resp, nil
+	return nil
 }
 
 func encodeFileServerMessage(msg isFileServerMessage_Message, token string) ([]byte, error) {
