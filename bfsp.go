@@ -146,6 +146,79 @@ func DownloadChunk(id string, fileId string, masterKey MasterKey) ([]byte, error
 	return nil, errors.New(respErr.Err)
 }
 
+func UploadFileMetadata(fileMeta *FileMetadata, masterKey MasterKey) error {
+	metaBytes, err := proto.Marshal(fileMeta)
+	if err != nil {
+		return err
+	}
+
+	zstdEncoder, err := zstd.NewWriter(nil)
+	if err != nil {
+		return err
+	}
+	defer zstdEncoder.Close()
+
+	compressedMetaBytes := zstdEncoder.EncodeAll(metaBytes, nil)
+
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+	nonce := make([]byte, 24)
+	copy(nonce, uuid[:])
+
+	newKeyBytes := masterKey[:]
+	newKeyBytes = append(newKeyBytes, uuid[:]...)
+	fileKey := blake3.Sum256(newKeyBytes)
+
+	enc, err := chacha20poly1305.NewX(fileKey[:])
+	if err != nil {
+		return err
+	}
+
+	encryptedMetaBytes := enc.Seal(nil, nonce, compressedMetaBytes, nil)
+
+	query := FileServerMessage_UploadFileMetadata_{
+		UploadFileMetadata: &FileServerMessage_UploadFileMetadata{
+			EncryptedFileMetadata: &EncryptedFileMetadata{
+				Metadata: encryptedMetaBytes,
+				Id:       uuid.String(),
+			},
+		},
+	}
+	uploadFileMetadataResponse := UploadFileMetadataResp{}
+	err = sendFileServerMessage(&query, spookyDeveloperToken, &uploadFileMetadataResponse)
+	if err != nil {
+		return err
+	}
+
+	if uploadFileMetadataResponse.Err != nil {
+		return errors.New(*uploadFileMetadataResponse.Err)
+	}
+
+	return nil
+}
+
+func UploadChunk(chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedCompressedChunkBytes EncryptedCompressedChunk, masterKey MasterKey) error {
+	query := FileServerMessage_UploadChunk_{
+		UploadChunk: &FileServerMessage_UploadChunk{
+			ChunkMetadata: chunkMetadata,
+			Chunk:         encryptedCompressedChunkBytes.chunk,
+		},
+	}
+	uploadChunkResponse := UploadChunkResp{}
+	err := sendFileServerMessage(&query, spookyDeveloperToken, &uploadChunkResponse)
+	if err != nil {
+		return err
+	}
+
+	if uploadChunkResponse.Err != nil {
+		return errors.New(*uploadChunkResponse.Err)
+	}
+
+	return nil
+}
+
 func sendFileServerMessage(msg isFileServerMessage_Message, token string, resp proto.Message) error {
 	msgBin, err := encodeFileServerMessage(msg, token)
 	if err != nil {
