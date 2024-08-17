@@ -1,6 +1,8 @@
 package bfsp
 
 import (
+	"encoding/base64"
+
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
 	"golang.org/x/crypto/chacha20poly1305"
@@ -40,4 +42,66 @@ func CompressEncryptChunk(chunkBytes []byte, chunkMetadata *ChunkMetadata, fileI
 	return &EncryptedCompressedChunk{
 		chunk: encryptedChunkBytes,
 	}, nil
+}
+
+func ShareFile(fileMeta *FileMetadata, token string, masterKey MasterKey) (*ViewFileInfo, error) {
+	fileUUID := uuid.MustParse(fileMeta.Id)
+	fileUUIDBin, err := fileUUID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	fileKeyBytes := masterKey[:]
+	fileKeyBytes = append(fileKeyBytes, fileUUIDBin...)
+	fileKey := blake3.Sum256(fileKeyBytes)
+
+	return &ViewFileInfo{
+		Id:         fileMeta.Id,
+		Token:      token,
+		FileEncKey: base64.URLEncoding.EncodeToString(fileKey[:]),
+	}, nil
+}
+
+func EncodeViewFileInfo(view *ViewFileInfo) (string, error) {
+	bin, err := proto.Marshal(view)
+	if err != nil {
+		return "", err
+	}
+
+	zstdEncoder, err := zstd.NewWriter(nil)
+	if err != nil {
+		return "", err
+	}
+	defer zstdEncoder.Close()
+
+	compressedViewBytes := zstdEncoder.EncodeAll(bin, nil)
+	viewInfoB64 := base64.URLEncoding.EncodeToString(compressedViewBytes)
+
+	return viewInfoB64, nil
+}
+
+func DecodeViewFileInfoB64(b64 string) (*ViewFileInfo, error) {
+	compressedViewInfoBin, err := base64.URLEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, err
+	}
+
+	zstdDecoder, err := zstd.NewReader(nil)
+	if err != nil {
+		return nil, err
+	}
+	defer zstdDecoder.Close()
+
+	viewInfoBytes, err := zstdDecoder.DecodeAll(compressedViewInfoBin, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var viewFileInfo ViewFileInfo
+	err = proto.Unmarshal(viewInfoBytes, &viewFileInfo)
+	if err != nil {
+		return nil, err
+	}
+
+	return &viewFileInfo, nil
 }

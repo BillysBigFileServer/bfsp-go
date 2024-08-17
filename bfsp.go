@@ -31,7 +31,10 @@ func ListFileMetadata(cli FileServerClient, ids []string, masterKey MasterKey) (
 
 		for fileId, metaInfo := range resp.Metadatas.Metadatas {
 			metaId := uuid.MustParse(metaInfo.Id)
-			metaIdBin, nil := metaId.MarshalBinary()
+			metaIdBin, err := metaId.MarshalBinary()
+			if err != nil {
+				return fileMetas, err
+			}
 
 			newKeyBytes := masterKey[:]
 			newKeyBytes = append(newKeyBytes, metaIdBin...)
@@ -90,6 +93,59 @@ func ListChunkMetadatas(cli FileServerClient, ids []string, masterKey MasterKey)
 	}
 
 	respErr := listChunkMetadataResponse.Response.(*ListChunkMetadataResp_Err)
+	return nil, errors.New(respErr.Err)
+}
+
+func DownloadFileMetadata(cli FileServerClient, fileId string, masterKey MasterKey) (*FileMetadata, error) {
+	query := FileServerMessage_DownloadFileMetadataQuery_{
+		DownloadFileMetadataQuery: &FileServerMessage_DownloadFileMetadataQuery{
+			Id: fileId,
+		},
+	}
+	downloadFileMetadataResponse := DownloadFileMetadataResp{}
+	err := cli.sendFileServerMessage(&query, &downloadFileMetadataResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp, ok := downloadFileMetadataResponse.Response.(*DownloadFileMetadataResp_EncryptedFileMetadata); ok {
+		metaId := uuid.MustParse(resp.EncryptedFileMetadata.Id)
+		metaIdBin, err := metaId.MarshalBinary()
+
+		newKeyBytes := masterKey[:]
+		newKeyBytes = append(newKeyBytes, metaIdBin...)
+		newKey := blake3.Sum256(newKeyBytes)
+
+		enc, err := chacha20poly1305.NewX(newKey[:])
+		if err != nil {
+			return nil, err
+		}
+
+		// pad nonce to 24 bytes
+		metaIdBin = append(metaIdBin, make([]byte, 8)...)
+		compressedMetaBytes, err := enc.Open([]byte{}, metaIdBin, resp.EncryptedFileMetadata.Metadata, []byte{})
+		if err != nil {
+			return nil, err
+		}
+
+		zstdDecoder, err := zstd.NewReader(bytes.NewReader(compressedMetaBytes))
+		if err != nil {
+			return nil, err
+		}
+		metaBytes, err := io.ReadAll(zstdDecoder)
+		if err != nil {
+			return nil, err
+		}
+		var fileMeta FileMetadata
+		err = proto.Unmarshal(metaBytes, &fileMeta)
+		if err != nil {
+			return nil, err
+		}
+
+		return &fileMeta, nil
+	}
+
+	respErr := downloadFileMetadataResponse.Response.(*DownloadFileMetadataResp_Err)
 	return nil, errors.New(respErr.Err)
 }
 
