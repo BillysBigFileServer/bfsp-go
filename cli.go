@@ -4,8 +4,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
 	"golang.org/x/crypto/chacha20poly1305"
+	"google.golang.org/protobuf/proto"
 	"lukechampine.com/blake3"
 )
+
+type FileServerClient interface {
+	sendFileServerMessage(msg isFileServerMessage_Message, resp proto.Message) error
+}
 
 type EncryptedCompressedChunk struct {
 	chunk []byte

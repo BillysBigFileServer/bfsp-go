@@ -2,11 +2,9 @@ package bfsp
 
 import (
 	"bytes"
+	"encoding/binary"
 	"errors"
 	"io"
-	"net/http"
-	"net/url"
-	"runtime"
 
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
@@ -16,16 +14,14 @@ import (
 	"lukechampine.com/blake3"
 )
 
-const spookyDeveloperToken string = "EsABClYKATEKBnJpZ2h0cwoGZGVsZXRlCgdwYXltZW50CgV1c2FnZRgDIgkKBwgKEgMYgAgiJAoiCIEIEh06GwoCGAAKAhgBCgIYGwoDGIIICgMYgwgKAxiECBIkCAASILKiZKevm2KmYGdiG2_XbABLuxMBC4LEvF8M5Hm2L7v0GkDTIpMh20WWTwpekxyAFrWgOe4elMXMdMaJcRxuIBY6e5no4QEWDyju0164pG_H4YiJ3VQ93T1UpGHOvSiNJQcLIiIKIMTBxP9qo6d-AezifT2zDizLUJxvm2Pxga74kavuMMYg"
-
-func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetadata, error) {
+func ListFileMetadata(cli FileServerClient, ids []string, masterKey MasterKey) (map[string]*FileMetadata, error) {
 	query := FileServerMessage_ListFileMetadataQuery_{
 		ListFileMetadataQuery: &FileServerMessage_ListFileMetadataQuery{
 			Ids: ids,
 		},
 	}
 	listFileMetadataResponse := ListFileMetadataResp{}
-	err := sendFileServerMessage(&query, spookyDeveloperToken, &listFileMetadataResponse)
+	err := cli.sendFileServerMessage(&query, &listFileMetadataResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +29,7 @@ func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetada
 	if resp, ok := listFileMetadataResponse.Response.(*ListFileMetadataResp_Metadatas); ok {
 		fileMetas := map[string]*FileMetadata{}
 
-		for _, metaInfo := range resp.Metadatas.Metadatas {
+		for fileId, metaInfo := range resp.Metadatas.Metadatas {
 			metaId := uuid.MustParse(metaInfo.Id)
 			metaIdBin, nil := metaId.MarshalBinary()
 
@@ -67,7 +63,7 @@ func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetada
 				return fileMetas, err
 			}
 
-			fileMetas[fileMeta.Id] = &fileMeta
+			fileMetas[fileId] = &fileMeta
 		}
 
 		return fileMetas, nil
@@ -75,17 +71,16 @@ func ListFileMetadata(ids []string, masterKey MasterKey) (map[string]*FileMetada
 
 	respErr := listFileMetadataResponse.Response.(*ListFileMetadataResp_Err)
 	return nil, errors.New(respErr.Err)
-
 }
 
-func ListChunkMetadatas(ids []string, masterKey MasterKey) (map[string]*ChunkMetadata, error) {
+func ListChunkMetadatas(cli FileServerClient, ids []string, masterKey MasterKey) (map[string]*ChunkMetadata, error) {
 	query := FileServerMessage_ListChunkMetadataQuery_{
 		ListChunkMetadataQuery: &FileServerMessage_ListChunkMetadataQuery{
 			Ids: ids,
 		},
 	}
 	listChunkMetadataResponse := ListChunkMetadataResp{}
-	err := sendFileServerMessage(&query, spookyDeveloperToken, &listChunkMetadataResponse)
+	err := cli.sendFileServerMessage(&query, &listChunkMetadataResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -98,14 +93,14 @@ func ListChunkMetadatas(ids []string, masterKey MasterKey) (map[string]*ChunkMet
 	return nil, errors.New(respErr.Err)
 }
 
-func DownloadChunk(id string, fileId string, masterKey MasterKey) ([]byte, error) {
+func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey MasterKey) ([]byte, error) {
 	query := FileServerMessage_DownloadChunkQuery_{
 		DownloadChunkQuery: &FileServerMessage_DownloadChunkQuery{
 			ChunkId: id,
 		},
 	}
 	downloadChunkResponse := DownloadChunkResp{}
-	err := sendFileServerMessage(&query, spookyDeveloperToken, &downloadChunkResponse)
+	err := cli.sendFileServerMessage(&query, &downloadChunkResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +141,7 @@ func DownloadChunk(id string, fileId string, masterKey MasterKey) ([]byte, error
 	return nil, errors.New(respErr.Err)
 }
 
-func UploadFileMetadata(fileMeta *FileMetadata, masterKey MasterKey) error {
+func UploadFileMetadata(cli FileServerClient, fileMeta *FileMetadata, masterKey MasterKey) error {
 	metaBytes, err := proto.Marshal(fileMeta)
 	if err != nil {
 		return err
@@ -160,7 +155,7 @@ func UploadFileMetadata(fileMeta *FileMetadata, masterKey MasterKey) error {
 
 	compressedMetaBytes := zstdEncoder.EncodeAll(metaBytes, nil)
 
-	uuid, err := uuid.NewRandom()
+	uuid, err := uuid.Parse(fileMeta.Id)
 	if err != nil {
 		return err
 	}
@@ -187,7 +182,7 @@ func UploadFileMetadata(fileMeta *FileMetadata, masterKey MasterKey) error {
 		},
 	}
 	uploadFileMetadataResponse := UploadFileMetadataResp{}
-	err = sendFileServerMessage(&query, spookyDeveloperToken, &uploadFileMetadataResponse)
+	err = cli.sendFileServerMessage(&query, &uploadFileMetadataResponse)
 	if err != nil {
 		return err
 	}
@@ -199,7 +194,7 @@ func UploadFileMetadata(fileMeta *FileMetadata, masterKey MasterKey) error {
 	return nil
 }
 
-func UploadChunk(chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedCompressedChunkBytes EncryptedCompressedChunk, masterKey MasterKey) error {
+func UploadChunk(cli FileServerClient, chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedCompressedChunkBytes EncryptedCompressedChunk, masterKey MasterKey) error {
 	query := FileServerMessage_UploadChunk_{
 		UploadChunk: &FileServerMessage_UploadChunk{
 			ChunkMetadata: chunkMetadata,
@@ -207,7 +202,7 @@ func UploadChunk(chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedComp
 		},
 	}
 	uploadChunkResponse := UploadChunkResp{}
-	err := sendFileServerMessage(&query, spookyDeveloperToken, &uploadChunkResponse)
+	err := cli.sendFileServerMessage(&query, &uploadChunkResponse)
 	if err != nil {
 		return err
 	}
@@ -219,51 +214,41 @@ func UploadChunk(chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedComp
 	return nil
 }
 
-func sendFileServerMessage(msg isFileServerMessage_Message, token string, resp proto.Message) error {
-	msgBin, err := encodeFileServerMessage(msg, token)
-	if err != nil {
-		return err
-	}
-
-	reader := bytes.NewReader(msgBin)
-	// the only two headers that the server cares about are Content-Type and Origin
-	headers := map[string][]string{
-		"Content-Type": {"application/octet-stream"},
-		"Origin":       {"localhost:8080"},
-	}
-	if runtime.GOOS == "js" {
-		// this header isn't actually sent to the server, but it tells the browser to send the request with CORS
-		headers["js.fetch:mode"] = []string{"cors"}
-	}
-
-	// TODO: can we use QUIC here, even in browsers? Otherwise, can we have an impl in quic and using HTTP, depending on the client
-	req := &http.Request{
-		Method: "POST",
-		URL:    &url.URL{Scheme: "http", Host: "localhost:9998", Path: "/api"},
-		Header: map[string][]string{
-			"Content-Type": {"application/octet-stream"},
-			"Origin":       {"localhost:8080"},
+func DeleteFileMetadata(cli FileServerClient, fileID string) error {
+	query := FileServerMessage_DeleteFileMetadataQuery_{
+		DeleteFileMetadataQuery: &FileServerMessage_DeleteFileMetadataQuery{
+			Id: fileID,
 		},
-		Body: io.NopCloser(reader),
+	}
+	deleteFileMetadataResponse := DeleteFileMetadataResp{}
+	err := cli.sendFileServerMessage(&query, &deleteFileMetadataResponse)
+	if err != nil {
+		return err
 	}
 
-	respBin, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
+	if deleteFileMetadataResponse.Err != nil {
+		return errors.New(*deleteFileMetadataResponse.Err)
 	}
-	defer respBin.Body.Close()
-	body, err := io.ReadAll(respBin.Body)
-	if err != nil {
-		return err
-	}
-	// the first 4 bytes are the length of the message in uint32_le, we'll ignore that for now
-	body = body[4:]
 
-	// i <3 generics
-	err = proto.Unmarshal(body, resp)
+	return nil
+}
+
+func DeleteChunks(cli FileServerClient, chunkIDs []string) error {
+	query := FileServerMessage_DeleteChunksQuery_{
+		DeleteChunksQuery: &FileServerMessage_DeleteChunksQuery{
+			ChunkIds: chunkIDs,
+		},
+	}
+	deleteChunksResponse := DeleteChunksResp{}
+	err := cli.sendFileServerMessage(&query, &deleteChunksResponse)
 	if err != nil {
 		return err
 	}
+
+	if deleteChunksResponse.Err != nil {
+		return errors.New(*deleteChunksResponse.Err)
+	}
+
 	return nil
 }
 
@@ -278,5 +263,12 @@ func encodeFileServerMessage(msg isFileServerMessage_Message, token string) ([]b
 	if err != nil {
 		return nil, err
 	}
-	return msgBin, nil
+	// prepend the size of the message as uint32-le
+	msgLen := uint32(len(msgBin))
+	fullMsgBin := make([]byte, 4+msgLen)
+
+	binary.LittleEndian.PutUint32(fullMsgBin[:4], msgLen)
+	copy(fullMsgBin[4:], msgBin)
+
+	return fullMsgBin, nil
 }
