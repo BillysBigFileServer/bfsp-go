@@ -44,6 +44,40 @@ func CompressEncryptChunk(chunkBytes []byte, chunkMetadata *ChunkMetadata, fileI
 	}, nil
 }
 
+func CompressEncryptChunkMetadata(chunkMetadata *ChunkMetadata, fileId string, masterKey MasterKey) ([]byte, error) {
+	zstdEncoder, err := zstd.NewWriter(nil)
+	if err != nil {
+		return nil, err
+	}
+	defer zstdEncoder.Close()
+
+	b, err := proto.Marshal(chunkMetadata)
+	compressedChunkBytes := zstdEncoder.EncodeAll(b, nil)
+
+	fileUUID := uuid.MustParse(fileId)
+	fileUUIDBin, err := fileUUID.MarshalBinary()
+	fileKeyBytes := masterKey[:]
+	fileKeyBytes = append(fileKeyBytes, fileUUIDBin...)
+	fileKey := blake3.Sum256(fileKeyBytes)
+
+	enc, err := chacha20poly1305.NewX(fileKey[:])
+	if err != nil {
+		return nil, err
+	}
+	chunkMetaUUID, err := uuid.Parse(chunkMetadata.Id)
+	if err != nil {
+		return nil, err
+	}
+	nonce, err := chunkMetaUUID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+	nonce = append(nonce, make([]byte, 24-len(nonce))...)
+
+	encryptedChunkMetaBytes := enc.Seal(nil, nonce, compressedChunkBytes, chunkMetaUUID[:])
+	return encryptedChunkMetaBytes, nil
+}
+
 func ShareFile(fileMeta *FileMetadata, token string, masterKey MasterKey) (*ViewFileInfo, error) {
 	fileUUID := uuid.MustParse(fileMeta.Id)
 	fileUUIDBin, err := fileUUID.MarshalBinary()

@@ -76,26 +76,6 @@ func ListFileMetadata(cli FileServerClient, ids []string, masterKey MasterKey) (
 	return nil, errors.New(respErr.Err)
 }
 
-func ListChunkMetadatas(cli FileServerClient, ids []string, masterKey MasterKey) (map[string]*ChunkMetadata, error) {
-	query := FileServerMessage_ListChunkMetadataQuery_{
-		ListChunkMetadataQuery: &FileServerMessage_ListChunkMetadataQuery{
-			Ids: ids,
-		},
-	}
-	listChunkMetadataResponse := ListChunkMetadataResp{}
-	err := cli.sendFileServerMessage(&query, &listChunkMetadataResponse)
-	if err != nil {
-		return nil, err
-	}
-
-	if resp, ok := listChunkMetadataResponse.Response.(*ListChunkMetadataResp_Metadatas); ok {
-		return resp.Metadatas.Metadatas, nil
-	}
-
-	respErr := listChunkMetadataResponse.Response.(*ListChunkMetadataResp_Err)
-	return nil, errors.New(respErr.Err)
-}
-
 func DownloadFileMetadata(cli FileServerClient, fileId string, masterKey MasterKey) (*FileMetadata, error) {
 	query := FileServerMessage_DownloadFileMetadataQuery_{
 		DownloadFileMetadataQuery: &FileServerMessage_DownloadFileMetadataQuery{
@@ -163,7 +143,7 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 
 	if resp, ok := downloadChunkResponse.Response.(*DownloadChunkResp_ChunkData_); ok {
 		fileIdUUID := uuid.MustParse(fileId)
-		fileIdBin, nil := fileIdUUID.MarshalBinary()
+		fileIdBin, err := fileIdUUID.MarshalBinary()
 
 		newKeyBytes := masterKey[:]
 		newKeyBytes = append(newKeyBytes, fileIdBin...)
@@ -176,7 +156,35 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 			return chunkBin, err
 		}
 
-		compressedChunkBytes, err := enc.Open([]byte{}, resp.ChunkData.ChunkMetadata.Nonce, resp.ChunkData.Chunk, []byte(resp.ChunkData.ChunkMetadata.Id))
+		var chunkMeta ChunkMetadata
+		if resp.ChunkData.EncChunkMetadata != nil {
+			encChunkMetadata := resp.ChunkData.EncChunkMetadata.EncMetadata
+
+			nonce := make([]byte, 24)
+			chunkMetaUUIDStr := resp.ChunkData.EncChunkMetadata.Id
+			chunkMetaUUID, err := uuid.Parse(chunkMetaUUIDStr)
+			if err != nil {
+				return nil, err
+			}
+
+			copy(nonce[:16], chunkMetaUUID[:])
+			compressedChunkMeta, err := enc.Open(nil, nonce, encChunkMetadata, chunkMetaUUID[:])
+			if err != nil {
+				return chunkBin, err
+			}
+			zstdDecoder, err := zstd.NewReader(nil)
+			if err != nil {
+				return nil, err
+			}
+			defer zstdDecoder.Close()
+
+			chunkMetaBin, err := zstdDecoder.DecodeAll(compressedChunkMeta, nil)
+			proto.Unmarshal(chunkMetaBin, &chunkMeta)
+		} else {
+			chunkMeta = *resp.ChunkData.ChunkMetadata
+		}
+
+		compressedChunkBytes, err := enc.Open([]byte{}, chunkMeta.Nonce, resp.ChunkData.Chunk, []byte(chunkMeta.Id))
 		if err != nil {
 			return chunkBin, err
 		}
@@ -185,6 +193,7 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 		if err != nil {
 			return chunkBin, err
 		}
+
 		chunkBin, err = io.ReadAll(zstdDecoder)
 		if err != nil {
 			return chunkBin, err
@@ -251,14 +260,22 @@ func UploadFileMetadata(cli FileServerClient, fileMeta *FileMetadata, masterKey 
 }
 
 func UploadChunk(cli FileServerClient, chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedCompressedChunkBytes EncryptedCompressedChunk, masterKey MasterKey) error {
+	compressedEncryptedMetaBytes, err := CompressEncryptChunkMetadata(chunkMetadata, fileUUIDStr, masterKey)
+	if err != nil {
+		return err
+	}
+
 	query := FileServerMessage_UploadChunk_{
 		UploadChunk: &FileServerMessage_UploadChunk{
-			ChunkMetadata: chunkMetadata,
-			Chunk:         encryptedCompressedChunkBytes.chunk,
+			EncChunkMetadata: &EncryptedChunkMetadata{
+				Id:          chunkMetadata.Id,
+				EncMetadata: compressedEncryptedMetaBytes,
+			},
+			Chunk: encryptedCompressedChunkBytes.chunk,
 		},
 	}
 	uploadChunkResponse := UploadChunkResp{}
-	err := cli.sendFileServerMessage(&query, &uploadChunkResponse)
+	err = cli.sendFileServerMessage(&query, &uploadChunkResponse)
 	if err != nil {
 		return err
 	}
