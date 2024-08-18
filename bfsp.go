@@ -156,7 +156,7 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 			return chunkBin, err
 		}
 
-		var chunkMeta ChunkMetadata
+		var chunkMeta *ChunkMetadata = &ChunkMetadata{}
 		if resp.ChunkData.EncChunkMetadata != nil {
 			encChunkMetadata := resp.ChunkData.EncChunkMetadata.EncMetadata
 
@@ -179,9 +179,9 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 			defer zstdDecoder.Close()
 
 			chunkMetaBin, err := zstdDecoder.DecodeAll(compressedChunkMeta, nil)
-			proto.Unmarshal(chunkMetaBin, &chunkMeta)
+			proto.Unmarshal(chunkMetaBin, chunkMeta)
 		} else {
-			chunkMeta = *resp.ChunkData.ChunkMetadata
+			chunkMeta = resp.ChunkData.ChunkMetadata
 		}
 
 		compressedChunkBytes, err := enc.Open([]byte{}, chunkMeta.Nonce, resp.ChunkData.Chunk, []byte(chunkMeta.Id))
@@ -197,6 +197,11 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 		chunkBin, err = io.ReadAll(zstdDecoder)
 		if err != nil {
 			return chunkBin, err
+		}
+
+		hash := blake3.Sum256(chunkBin)
+		if hash != [32]byte(chunkMeta.Hash) {
+			return nil, fmt.Errorf("hash does not match")
 		}
 
 		return chunkBin, nil
