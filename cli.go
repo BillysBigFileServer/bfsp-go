@@ -1,8 +1,11 @@
 package bfsp
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 
+	"github.com/biscuit-auth/biscuit-go/v2"
+	"github.com/biscuit-auth/biscuit-go/v2/parser"
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
 	"golang.org/x/crypto/chacha20poly1305"
@@ -12,6 +15,7 @@ import (
 
 type FileServerClient interface {
 	sendFileServerMessage(msg isFileServerMessage_Message, resp proto.Message) error
+	setToken(token string) FileServerClient
 }
 
 type EncryptedCompressedChunk struct {
@@ -78,9 +82,62 @@ func CompressEncryptChunkMetadata(chunkMetadata *ChunkMetadata, fileId string, m
 	return encryptedChunkMetaBytes, nil
 }
 
-func ShareFile(fileMeta *FileMetadata, token string, masterKey MasterKey) (*ViewFileInfo, error) {
+func ShareFile(fileMeta *FileMetadata, tokenStr string, masterKey MasterKey) (*ViewFileInfo, error) {
 	fileUUID := uuid.MustParse(fileMeta.Id)
 	fileUUIDBin, err := fileUUID.MarshalBinary()
+	if err != nil {
+		return nil, err
+	}
+
+	tokenBytes, err := base64.URLEncoding.DecodeString(tokenStr)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := biscuit.Unmarshal(tokenBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	blockBuilder := token.CreateBlock()
+
+	// check all is currently unsupported in biscuit-go, gotta use a few check ifs rn
+	check, err := parser.FromStringCheck(`check if rights($rights), right($right), $rights.contains($right)`)
+	if err != nil {
+		return nil, err
+	}
+	err = blockBuilder.AddCheck(check)
+	if err != nil {
+		return nil, err
+	}
+
+	check, err = parser.FromStringCheck(`check if allowed_file_ids($allowed_file_ids), file_ids($file_ids), $allowed_file_ids.contains($file_ids)`)
+	if err != nil {
+		return nil, err
+	}
+	err = blockBuilder.AddCheck(check)
+	if err != nil {
+		return nil, err
+	}
+
+	blockBuilder.AddFact(biscuit.Fact{
+		Predicate: biscuit.Predicate{
+			Name: "rights",
+			IDs: []biscuit.Term{
+				biscuit.Set{biscuit.String("read"), biscuit.String("write")},
+			},
+		},
+	})
+	blockBuilder.AddFact(biscuit.Fact{
+		Predicate: biscuit.Predicate{
+			Name: "allowed_file_ids",
+			IDs: []biscuit.Term{
+				biscuit.Set{biscuit.String(fileUUID.String())},
+			},
+		},
+	})
+	rng := rand.Reader
+	newToken, err := token.Append(rng, blockBuilder.Build())
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +146,15 @@ func ShareFile(fileMeta *FileMetadata, token string, masterKey MasterKey) (*View
 	fileKeyBytes = append(fileKeyBytes, fileUUIDBin...)
 	fileKey := blake3.Sum256(fileKeyBytes)
 
+	serializedToken, err := newToken.Serialize()
+	if err != nil {
+		return nil, err
+	}
+	serializedTokenStr := base64.URLEncoding.EncodeToString(serializedToken)
+
 	return &ViewFileInfo{
 		Id:         fileMeta.Id,
-		Token:      token,
+		Token:      serializedTokenStr,
 		FileEncKey: base64.URLEncoding.EncodeToString(fileKey[:]),
 	}, nil
 }

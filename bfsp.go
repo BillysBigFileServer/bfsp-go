@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/google/uuid"
@@ -129,10 +130,20 @@ func DownloadFileMetadata(cli FileServerClient, fileId string, masterKey MasterK
 	return nil, errors.New(respErr.Err)
 }
 
-func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey MasterKey) ([]byte, error) {
+type DownloadChunkArgs struct {
+	ChunkID string
+	FileID  string
+	Token   string
+}
+
+func DownloadChunk(cli FileServerClient, args DownloadChunkArgs, masterKey MasterKey) ([]byte, error) {
+	if args.Token != "" {
+		cli = cli.setToken(args.Token)
+	}
+
 	query := FileServerMessage_DownloadChunkQuery_{
 		DownloadChunkQuery: &FileServerMessage_DownloadChunkQuery{
-			ChunkId: id,
+			ChunkId: args.ChunkID,
 		},
 	}
 	downloadChunkResponse := DownloadChunkResp{}
@@ -142,7 +153,7 @@ func DownloadChunk(cli FileServerClient, id string, fileId string, masterKey Mas
 	}
 
 	if resp, ok := downloadChunkResponse.Response.(*DownloadChunkResp_ChunkData_); ok {
-		fileIdUUID := uuid.MustParse(fileId)
+		fileIdUUID := uuid.MustParse(args.FileID)
 		fileIdBin, err := fileIdUUID.MarshalBinary()
 
 		newKeyBytes := masterKey[:]

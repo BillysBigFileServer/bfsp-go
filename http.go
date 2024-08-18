@@ -24,6 +24,12 @@ func NewHTTPFileServerClient(token string, baseUrl string, https bool) (FileServ
 	}, nil
 }
 
+func (cli *httpClient) setToken(token string) FileServerClient {
+	newCli := *cli
+	newCli.token = token
+	return &newCli
+}
+
 func (cli *httpClient) sendFileServerMessage(msg isFileServerMessage_Message, resp proto.Message) error {
 	msgBin, err := encodeFileServerMessage(msg, cli.token)
 	if err != nil {

@@ -3,6 +3,7 @@ module github.com/BillysBigFileServer/bfsp-go
 go 1.22.5
 
 require (
+	github.com/biscuit-auth/biscuit-go/v2 v2.2.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.17.9
 	golang.org/x/crypto v0.26.0
@@ -11,6 +12,7 @@ require (
 )
 
 require (
+	github.com/alecthomas/participle/v2 v2.0.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 )
