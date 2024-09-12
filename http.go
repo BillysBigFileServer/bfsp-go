@@ -75,7 +75,7 @@ func (cli *httpClient) sendFileServerMessage(msg isFileServerMessage_Message, re
 	// the first 4 bytes are the length of the message in uint32_le, we'll ignore that for now
 	body = body[4:]
 
-	// i <3 generics
+	// i <3 interfaces
 	err = proto.Unmarshal(body, resp)
 	if err != nil {
 		return err
