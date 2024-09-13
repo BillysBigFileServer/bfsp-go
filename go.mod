@@ -3,6 +3,7 @@ module github.com/BillysBigFileServer/bfsp-go
 go 1.22.5
 
 require (
+	github.com/adrg/xdg v0.5.0
 	github.com/biscuit-auth/biscuit-go/v2 v2.2.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.17.9
