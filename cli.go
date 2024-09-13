@@ -5,11 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"io"
-	"os"
-	sync "sync"
-	"sync/atomic"
+	"sort"
+	"sync"
 	"time"
 
 	"github.com/biscuit-auth/biscuit-go/v2"
@@ -128,7 +126,6 @@ type FileInfo struct {
 func UploadFile(ctx context.Context, fileInfo *FileInfo, concurrencyLimit int) error {
 	chunks := sync.Map{}
 	var totalSize uint64 = 0
-	totalUploaded := atomic.Uint64{}
 
 	fileID, err := uuid.NewRandom()
 	if err != nil {
@@ -190,10 +187,6 @@ UploadLoop:
 			}, b)
 
 			chunks.Store(uint64(chunkMetadata.Indice), chunkMetadata.Id)
-			totalUploaded := totalUploaded.Add(uint64(chunkLen))
-
-			fmt.Fprintf(os.Stderr, "%d bytes uploaded", totalUploaded)
-
 			return nil
 		})
 
@@ -223,6 +216,43 @@ UploadLoop:
 	}
 	err = UploadFileMetadata(client, fileMetadata, masterKey)
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DownloadFile(ctx context.Context, fileMeta *FileMetadata, fileWriter io.Writer, token string) error {
+	client := ClientFromContext(ctx)
+	masterKey := MasterKeyFromContext(ctx)
+
+	chunkIndices := []uint64{}
+
+	for chunkIndice := range fileMeta.Chunks {
+		chunkIndices = append(chunkIndices, chunkIndice)
+	}
+	sort.Slice(chunkIndices, func(i, j int) bool { return chunkIndices[i] < chunkIndices[j] })
+
+	g := errgroup.Group{}
+	g.SetLimit(100)
+	for _, indice := range chunkIndices {
+		indice := indice
+		chunkId := fileMeta.Chunks[indice]
+		chunk, err := DownloadChunk(client, DownloadChunkArgs{
+			ChunkID: chunkId,
+			FileID:  fileMeta.Id,
+			Token:   token,
+		}, masterKey)
+		if err != nil {
+			return err
+		}
+
+		_, err = fileWriter.Write(chunk)
+		if err != nil {
+			return err
+		}
+	}
+	if err := g.Wait(); err != nil {
 		return err
 	}
 
