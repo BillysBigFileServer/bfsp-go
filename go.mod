@@ -5,9 +5,11 @@ go 1.22.5
 require (
 	github.com/adrg/xdg v0.5.0
 	github.com/biscuit-auth/biscuit-go/v2 v2.2.0
+	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/google/uuid v1.6.0
 	github.com/klauspost/compress v1.17.9
 	golang.org/x/crypto v0.26.0
+	golang.org/x/sync v0.8.0
 	google.golang.org/protobuf v1.34.2
 	lukechampine.com/blake3 v1.3.0
 )

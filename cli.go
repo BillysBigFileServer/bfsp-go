@@ -4,11 +4,20 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
+	"fmt"
+	"io"
+	"os"
+	sync "sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/biscuit-auth/biscuit-go/v2"
 	"github.com/biscuit-auth/biscuit-go/v2/parser"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/google/uuid"
 	"github.com/klauspost/compress/zstd"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/protobuf/proto"
 	"lukechampine.com/blake3"
 )
@@ -109,6 +118,115 @@ func ShareFile(fileMeta *FileMetadata, tokenStr string, masterKey MasterKey) (*V
 		Token:      serializedTokenStr,
 		FileEncKey: base64.URLEncoding.EncodeToString(fileKey[:]),
 	}, nil
+}
+
+type FileInfo struct {
+	Name   string
+	Reader io.Reader
+}
+
+func UploadFile(ctx context.Context, fileInfo *FileInfo, concurrencyLimit int) error {
+	chunks := sync.Map{}
+	var totalSize uint64 = 0
+	totalUploaded := atomic.Uint64{}
+
+	fileID, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+
+	client := ClientFromContext(ctx)
+	masterKey := MasterKeyFromContext(ctx)
+
+	g := errgroup.Group{}
+	g.SetLimit(100)
+	offset := 0
+
+UploadLoop:
+	for {
+		buf := make([]byte, 1024*1024)
+		n, err := fileInfo.Reader.Read(buf)
+		if err != nil {
+			switch {
+			case errors.Is(err, io.EOF):
+				break UploadLoop
+			default:
+				return err
+			}
+		}
+		buf = buf[:n]
+		totalSize += uint64(n)
+
+		g.Go(func() error {
+			chunkHash := blake3.Sum256(buf)
+			chunkId, err := uuid.NewRandom()
+			if err != nil {
+				return err
+			}
+			chunkLen := uint32(len(buf))
+
+			chunkNonce := make([]byte, 24)
+			// random bytes for chunk nonce
+			_, err = rand.Read(chunkNonce)
+			if err != nil {
+				return err
+			}
+			chunkMetadata := &ChunkMetadata{
+				Id:     chunkId.String(),
+				Hash:   chunkHash[:],
+				Size:   chunkLen,
+				Indice: int64(offset / (1024 * 1024)),
+				Nonce:  chunkNonce,
+			}
+
+			processecdChunk, err := CompressEncryptChunk(buf, chunkMetadata, fileID.String(), masterKey)
+			if err != nil {
+				return err
+			}
+
+			b := backoff.NewExponentialBackOff(backoff.WithMaxElapsedTime(10 * time.Second))
+			err = backoff.Retry(func() error {
+				return UploadChunk(client, chunkMetadata, fileID.String(), *processecdChunk, masterKey)
+			}, b)
+
+			chunks.Store(uint64(chunkMetadata.Indice), chunkMetadata.Id)
+			totalUploaded := totalUploaded.Add(uint64(chunkLen))
+
+			fmt.Fprintf(os.Stderr, "%d bytes uploaded", totalUploaded)
+
+			return nil
+		})
+
+		offset += 1024
+	}
+
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	chunksFileMetadata := map[uint64]string{}
+	chunks.Range(func(key, value interface{}) bool {
+		chunksFileMetadata[key.(uint64)] = value.(string)
+		return true
+	})
+
+	currentUnixUTCTime := time.Now().UTC().Unix()
+	fileMetadata := &FileMetadata{
+		Id:               fileID.String(),
+		Chunks:           chunksFileMetadata,
+		FileName:         fileInfo.Name,
+		FileType:         FileType_UNKNOWN,
+		FileSize:         totalSize,
+		Directory:        []string{},
+		CreateTime:       currentUnixUTCTime,
+		ModificationTime: currentUnixUTCTime,
+	}
+	err = UploadFileMetadata(client, fileMetadata, masterKey)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func EncodeViewFileInfo(view *ViewFileInfo) (string, error) {
