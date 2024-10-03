@@ -22,7 +22,7 @@ func ListFileMetadata(cli FileServerClient, ids []string, masterKey MasterKey) (
 		},
 	}
 	listFileMetadataResponse := ListFileMetadataResp{}
-	err := cli.sendFileServerMessage(&query, &listFileMetadataResponse)
+	err := cli.SendFileServerMessage(&query, &listFileMetadataResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func DownloadFileMetadata(cli FileServerClient, fileId string, masterKey MasterK
 		},
 	}
 	downloadFileMetadataResponse := DownloadFileMetadataResp{}
-	err := cli.sendFileServerMessage(&query, &downloadFileMetadataResponse)
+	err := cli.SendFileServerMessage(&query, &downloadFileMetadataResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func DownloadChunk(cli FileServerClient, args DownloadChunkArgs, masterKey Maste
 		},
 	}
 	downloadChunkResponse := DownloadChunkResp{}
-	err := cli.sendFileServerMessage(&query, &downloadChunkResponse)
+	err := cli.SendFileServerMessage(&query, &downloadChunkResponse)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +263,7 @@ func UploadFileMetadata(cli FileServerClient, fileMeta *FileMetadata, masterKey 
 		},
 	}
 	uploadFileMetadataResponse := UploadFileMetadataResp{}
-	err = cli.sendFileServerMessage(&query, &uploadFileMetadataResponse)
+	err = cli.SendFileServerMessage(&query, &uploadFileMetadataResponse)
 	if err != nil {
 		return err
 	}
@@ -291,7 +291,7 @@ func UploadChunk(cli FileServerClient, chunkMetadata *ChunkMetadata, fileUUIDStr
 		},
 	}
 	uploadChunkResponse := UploadChunkResp{}
-	err = cli.sendFileServerMessage(&query, &uploadChunkResponse)
+	err = cli.SendFileServerMessage(&query, &uploadChunkResponse)
 	if err != nil {
 		return err
 	}
@@ -310,7 +310,7 @@ func DeleteFileMetadata(cli FileServerClient, fileID string) error {
 		},
 	}
 	deleteFileMetadataResponse := DeleteFileMetadataResp{}
-	err := cli.sendFileServerMessage(&query, &deleteFileMetadataResponse)
+	err := cli.SendFileServerMessage(&query, &deleteFileMetadataResponse)
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func DeleteChunks(cli FileServerClient, chunkIDs []string) error {
 		},
 	}
 	deleteChunksResponse := DeleteChunksResp{}
-	err := cli.sendFileServerMessage(&query, &deleteChunksResponse)
+	err := cli.SendFileServerMessage(&query, &deleteChunksResponse)
 	if err != nil {
 		return err
 	}

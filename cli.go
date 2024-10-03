@@ -21,7 +21,7 @@ import (
 )
 
 type FileServerClient interface {
-	sendFileServerMessage(msg isFileServerMessage_Message, resp proto.Message) error
+	SendFileServerMessage(msg isFileServerMessage_Message, resp proto.Message) error
 	setToken(token string) FileServerClient
 }
 
