@@ -95,6 +95,7 @@ type FileServerMessage struct {
 	//	*FileServerMessage_GetUsageQuery_
 	//	*FileServerMessage_SetMasterKey
 	//	*FileServerMessage_GetMasterKey
+	//	*FileServerMessage_UpdateFileMetadata_
 	Message isFileServerMessage_Message `protobuf_oneof:"message"`
 }
 
@@ -228,6 +229,13 @@ func (x *FileServerMessage) GetGetMasterKey() *FileServerMessage_GetMasterEncryp
 	return nil
 }
 
+func (x *FileServerMessage) GetUpdateFileMetadata() *FileServerMessage_UpdateFileMetadata {
+	if x, ok := x.GetMessage().(*FileServerMessage_UpdateFileMetadata_); ok {
+		return x.UpdateFileMetadata
+	}
+	return nil
+}
+
 type isFileServerMessage_Message interface {
 	isFileServerMessage_Message()
 }
@@ -280,6 +288,10 @@ type FileServerMessage_GetMasterKey struct {
 	GetMasterKey *FileServerMessage_GetMasterEncryptionKey `protobuf:"bytes,13,opt,name=get_master_key,json=getMasterKey,proto3,oneof"`
 }
 
+type FileServerMessage_UpdateFileMetadata_ struct {
+	UpdateFileMetadata *FileServerMessage_UpdateFileMetadata `protobuf:"bytes,14,opt,name=update_file_metadata,json=updateFileMetadata,proto3,oneof"`
+}
+
 func (*FileServerMessage_UploadChunk_) isFileServerMessage_Message() {}
 
 func (*FileServerMessage_ChunksUploadedQuery_) isFileServerMessage_Message() {}
@@ -303,6 +315,8 @@ func (*FileServerMessage_GetUsageQuery_) isFileServerMessage_Message() {}
 func (*FileServerMessage_SetMasterKey) isFileServerMessage_Message() {}
 
 func (*FileServerMessage_GetMasterKey) isFileServerMessage_Message() {}
+
+func (*FileServerMessage_UpdateFileMetadata_) isFileServerMessage_Message() {}
 
 type UploadChunkResp struct {
 	state         protoimpl.MessageState
@@ -654,6 +668,53 @@ func (x *UploadFileMetadataResp) GetErr() string {
 	return ""
 }
 
+type UpdateFileMetadataResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Err *string `protobuf:"bytes,1,opt,name=err,proto3,oneof" json:"err,omitempty"`
+}
+
+func (x *UpdateFileMetadataResp) Reset() {
+	*x = UpdateFileMetadataResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bfsp_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateFileMetadataResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateFileMetadataResp) ProtoMessage() {}
+
+func (x *UpdateFileMetadataResp) ProtoReflect() protoreflect.Message {
+	mi := &file_bfsp_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateFileMetadataResp.ProtoReflect.Descriptor instead.
+func (*UpdateFileMetadataResp) Descriptor() ([]byte, []int) {
+	return file_bfsp_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateFileMetadataResp) GetErr() string {
+	if x != nil && x.Err != nil {
+		return *x.Err
+	}
+	return ""
+}
+
 type DownloadFileMetadataResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -669,7 +730,7 @@ type DownloadFileMetadataResp struct {
 func (x *DownloadFileMetadataResp) Reset() {
 	*x = DownloadFileMetadataResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[8]
+		mi := &file_bfsp_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -682,7 +743,7 @@ func (x *DownloadFileMetadataResp) String() string {
 func (*DownloadFileMetadataResp) ProtoMessage() {}
 
 func (x *DownloadFileMetadataResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[8]
+	mi := &file_bfsp_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -695,7 +756,7 @@ func (x *DownloadFileMetadataResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadFileMetadataResp.ProtoReflect.Descriptor instead.
 func (*DownloadFileMetadataResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{8}
+	return file_bfsp_proto_rawDescGZIP(), []int{9}
 }
 
 func (m *DownloadFileMetadataResp) GetResponse() isDownloadFileMetadataResp_Response {
@@ -750,7 +811,7 @@ type ListFileMetadataResp struct {
 func (x *ListFileMetadataResp) Reset() {
 	*x = ListFileMetadataResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[9]
+		mi := &file_bfsp_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -763,7 +824,7 @@ func (x *ListFileMetadataResp) String() string {
 func (*ListFileMetadataResp) ProtoMessage() {}
 
 func (x *ListFileMetadataResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[9]
+	mi := &file_bfsp_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -776,7 +837,7 @@ func (x *ListFileMetadataResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListFileMetadataResp.ProtoReflect.Descriptor instead.
 func (*ListFileMetadataResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{9}
+	return file_bfsp_proto_rawDescGZIP(), []int{10}
 }
 
 func (m *ListFileMetadataResp) GetResponse() isListFileMetadataResp_Response {
@@ -831,7 +892,7 @@ type ListChunkMetadataResp struct {
 func (x *ListChunkMetadataResp) Reset() {
 	*x = ListChunkMetadataResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[10]
+		mi := &file_bfsp_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -844,7 +905,7 @@ func (x *ListChunkMetadataResp) String() string {
 func (*ListChunkMetadataResp) ProtoMessage() {}
 
 func (x *ListChunkMetadataResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[10]
+	mi := &file_bfsp_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -857,7 +918,7 @@ func (x *ListChunkMetadataResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListChunkMetadataResp.ProtoReflect.Descriptor instead.
 func (*ListChunkMetadataResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{10}
+	return file_bfsp_proto_rawDescGZIP(), []int{11}
 }
 
 func (m *ListChunkMetadataResp) GetResponse() isListChunkMetadataResp_Response {
@@ -912,7 +973,7 @@ type GetUsageResp struct {
 func (x *GetUsageResp) Reset() {
 	*x = GetUsageResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[11]
+		mi := &file_bfsp_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -925,7 +986,7 @@ func (x *GetUsageResp) String() string {
 func (*GetUsageResp) ProtoMessage() {}
 
 func (x *GetUsageResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[11]
+	mi := &file_bfsp_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -938,7 +999,7 @@ func (x *GetUsageResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUsageResp.ProtoReflect.Descriptor instead.
 func (*GetUsageResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{11}
+	return file_bfsp_proto_rawDescGZIP(), []int{12}
 }
 
 func (m *GetUsageResp) GetResponse() isGetUsageResp_Response {
@@ -989,7 +1050,7 @@ type SetMasterEncryptionKeyResp struct {
 func (x *SetMasterEncryptionKeyResp) Reset() {
 	*x = SetMasterEncryptionKeyResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[12]
+		mi := &file_bfsp_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1002,7 +1063,7 @@ func (x *SetMasterEncryptionKeyResp) String() string {
 func (*SetMasterEncryptionKeyResp) ProtoMessage() {}
 
 func (x *SetMasterEncryptionKeyResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[12]
+	mi := &file_bfsp_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1015,7 +1076,7 @@ func (x *SetMasterEncryptionKeyResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetMasterEncryptionKeyResp.ProtoReflect.Descriptor instead.
 func (*SetMasterEncryptionKeyResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{12}
+	return file_bfsp_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SetMasterEncryptionKeyResp) GetErr() string {
@@ -1040,7 +1101,7 @@ type GetMasterEncryptionKeyResp struct {
 func (x *GetMasterEncryptionKeyResp) Reset() {
 	*x = GetMasterEncryptionKeyResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[13]
+		mi := &file_bfsp_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1053,7 +1114,7 @@ func (x *GetMasterEncryptionKeyResp) String() string {
 func (*GetMasterEncryptionKeyResp) ProtoMessage() {}
 
 func (x *GetMasterEncryptionKeyResp) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[13]
+	mi := &file_bfsp_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1066,7 +1127,7 @@ func (x *GetMasterEncryptionKeyResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMasterEncryptionKeyResp.ProtoReflect.Descriptor instead.
 func (*GetMasterEncryptionKeyResp) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{13}
+	return file_bfsp_proto_rawDescGZIP(), []int{14}
 }
 
 func (m *GetMasterEncryptionKeyResp) GetResponse() isGetMasterEncryptionKeyResp_Response {
@@ -1118,7 +1179,7 @@ type EncryptedChunkMetadata struct {
 func (x *EncryptedChunkMetadata) Reset() {
 	*x = EncryptedChunkMetadata{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[14]
+		mi := &file_bfsp_proto_msgTypes[15]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1131,7 +1192,7 @@ func (x *EncryptedChunkMetadata) String() string {
 func (*EncryptedChunkMetadata) ProtoMessage() {}
 
 func (x *EncryptedChunkMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[14]
+	mi := &file_bfsp_proto_msgTypes[15]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1144,7 +1205,7 @@ func (x *EncryptedChunkMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EncryptedChunkMetadata.ProtoReflect.Descriptor instead.
 func (*EncryptedChunkMetadata) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{14}
+	return file_bfsp_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *EncryptedChunkMetadata) GetId() string {
@@ -1176,7 +1237,7 @@ type ChunkMetadata struct {
 func (x *ChunkMetadata) Reset() {
 	*x = ChunkMetadata{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[15]
+		mi := &file_bfsp_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1189,7 +1250,7 @@ func (x *ChunkMetadata) String() string {
 func (*ChunkMetadata) ProtoMessage() {}
 
 func (x *ChunkMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[15]
+	mi := &file_bfsp_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1202,7 +1263,7 @@ func (x *ChunkMetadata) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChunkMetadata.ProtoReflect.Descriptor instead.
 func (*ChunkMetadata) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{15}
+	return file_bfsp_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ChunkMetadata) GetId() string {
@@ -1254,7 +1315,7 @@ type FileServerMessage_UploadChunk struct {
 func (x *FileServerMessage_UploadChunk) Reset() {
 	*x = FileServerMessage_UploadChunk{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[16]
+		mi := &file_bfsp_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1267,7 +1328,7 @@ func (x *FileServerMessage_UploadChunk) String() string {
 func (*FileServerMessage_UploadChunk) ProtoMessage() {}
 
 func (x *FileServerMessage_UploadChunk) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[16]
+	mi := &file_bfsp_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1316,7 +1377,7 @@ type FileServerMessage_ChunksUploadedQuery struct {
 func (x *FileServerMessage_ChunksUploadedQuery) Reset() {
 	*x = FileServerMessage_ChunksUploadedQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[17]
+		mi := &file_bfsp_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1329,7 +1390,7 @@ func (x *FileServerMessage_ChunksUploadedQuery) String() string {
 func (*FileServerMessage_ChunksUploadedQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_ChunksUploadedQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[17]
+	mi := &file_bfsp_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1424,7 @@ type FileServerMessage_ListChunkMetadataQuery struct {
 func (x *FileServerMessage_ListChunkMetadataQuery) Reset() {
 	*x = FileServerMessage_ListChunkMetadataQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[18]
+		mi := &file_bfsp_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1376,7 +1437,7 @@ func (x *FileServerMessage_ListChunkMetadataQuery) String() string {
 func (*FileServerMessage_ListChunkMetadataQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_ListChunkMetadataQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[18]
+	mi := &file_bfsp_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1410,7 +1471,7 @@ type FileServerMessage_DownloadChunkQuery struct {
 func (x *FileServerMessage_DownloadChunkQuery) Reset() {
 	*x = FileServerMessage_DownloadChunkQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[19]
+		mi := &file_bfsp_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1423,7 +1484,7 @@ func (x *FileServerMessage_DownloadChunkQuery) String() string {
 func (*FileServerMessage_DownloadChunkQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_DownloadChunkQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[19]
+	mi := &file_bfsp_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1457,7 +1518,7 @@ type FileServerMessage_DeleteChunksQuery struct {
 func (x *FileServerMessage_DeleteChunksQuery) Reset() {
 	*x = FileServerMessage_DeleteChunksQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[20]
+		mi := &file_bfsp_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1470,7 +1531,7 @@ func (x *FileServerMessage_DeleteChunksQuery) String() string {
 func (*FileServerMessage_DeleteChunksQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_DeleteChunksQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[20]
+	mi := &file_bfsp_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1504,7 +1565,7 @@ type FileServerMessage_Authentication struct {
 func (x *FileServerMessage_Authentication) Reset() {
 	*x = FileServerMessage_Authentication{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[21]
+		mi := &file_bfsp_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1517,7 +1578,7 @@ func (x *FileServerMessage_Authentication) String() string {
 func (*FileServerMessage_Authentication) ProtoMessage() {}
 
 func (x *FileServerMessage_Authentication) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[21]
+	mi := &file_bfsp_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1551,7 +1612,7 @@ type FileServerMessage_UploadFileMetadata struct {
 func (x *FileServerMessage_UploadFileMetadata) Reset() {
 	*x = FileServerMessage_UploadFileMetadata{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[22]
+		mi := &file_bfsp_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1564,7 +1625,7 @@ func (x *FileServerMessage_UploadFileMetadata) String() string {
 func (*FileServerMessage_UploadFileMetadata) ProtoMessage() {}
 
 func (x *FileServerMessage_UploadFileMetadata) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[22]
+	mi := &file_bfsp_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1587,6 +1648,53 @@ func (x *FileServerMessage_UploadFileMetadata) GetEncryptedFileMetadata() *Encry
 	return nil
 }
 
+type FileServerMessage_UpdateFileMetadata struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	EncryptedFileMetadata *EncryptedFileMetadata `protobuf:"bytes,1,opt,name=encrypted_file_metadata,json=encryptedFileMetadata,proto3" json:"encrypted_file_metadata,omitempty"`
+}
+
+func (x *FileServerMessage_UpdateFileMetadata) Reset() {
+	*x = FileServerMessage_UpdateFileMetadata{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_bfsp_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *FileServerMessage_UpdateFileMetadata) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FileServerMessage_UpdateFileMetadata) ProtoMessage() {}
+
+func (x *FileServerMessage_UpdateFileMetadata) ProtoReflect() protoreflect.Message {
+	mi := &file_bfsp_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FileServerMessage_UpdateFileMetadata.ProtoReflect.Descriptor instead.
+func (*FileServerMessage_UpdateFileMetadata) Descriptor() ([]byte, []int) {
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 7}
+}
+
+func (x *FileServerMessage_UpdateFileMetadata) GetEncryptedFileMetadata() *EncryptedFileMetadata {
+	if x != nil {
+		return x.EncryptedFileMetadata
+	}
+	return nil
+}
+
 type FileServerMessage_DownloadFileMetadataQuery struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1598,7 +1706,7 @@ type FileServerMessage_DownloadFileMetadataQuery struct {
 func (x *FileServerMessage_DownloadFileMetadataQuery) Reset() {
 	*x = FileServerMessage_DownloadFileMetadataQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[23]
+		mi := &file_bfsp_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1611,7 +1719,7 @@ func (x *FileServerMessage_DownloadFileMetadataQuery) String() string {
 func (*FileServerMessage_DownloadFileMetadataQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_DownloadFileMetadataQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[23]
+	mi := &file_bfsp_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1624,7 +1732,7 @@ func (x *FileServerMessage_DownloadFileMetadataQuery) ProtoReflect() protoreflec
 
 // Deprecated: Use FileServerMessage_DownloadFileMetadataQuery.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_DownloadFileMetadataQuery) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 7}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 8}
 }
 
 func (x *FileServerMessage_DownloadFileMetadataQuery) GetId() string {
@@ -1645,7 +1753,7 @@ type FileServerMessage_ListFileMetadataQuery struct {
 func (x *FileServerMessage_ListFileMetadataQuery) Reset() {
 	*x = FileServerMessage_ListFileMetadataQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[24]
+		mi := &file_bfsp_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1658,7 +1766,7 @@ func (x *FileServerMessage_ListFileMetadataQuery) String() string {
 func (*FileServerMessage_ListFileMetadataQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_ListFileMetadataQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[24]
+	mi := &file_bfsp_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1671,7 +1779,7 @@ func (x *FileServerMessage_ListFileMetadataQuery) ProtoReflect() protoreflect.Me
 
 // Deprecated: Use FileServerMessage_ListFileMetadataQuery.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_ListFileMetadataQuery) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 8}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 9}
 }
 
 func (x *FileServerMessage_ListFileMetadataQuery) GetIds() []string {
@@ -1692,7 +1800,7 @@ type FileServerMessage_DeleteFileMetadataQuery struct {
 func (x *FileServerMessage_DeleteFileMetadataQuery) Reset() {
 	*x = FileServerMessage_DeleteFileMetadataQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[25]
+		mi := &file_bfsp_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1705,7 +1813,7 @@ func (x *FileServerMessage_DeleteFileMetadataQuery) String() string {
 func (*FileServerMessage_DeleteFileMetadataQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_DeleteFileMetadataQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[25]
+	mi := &file_bfsp_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1718,7 +1826,7 @@ func (x *FileServerMessage_DeleteFileMetadataQuery) ProtoReflect() protoreflect.
 
 // Deprecated: Use FileServerMessage_DeleteFileMetadataQuery.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_DeleteFileMetadataQuery) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 9}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 10}
 }
 
 func (x *FileServerMessage_DeleteFileMetadataQuery) GetId() string {
@@ -1737,7 +1845,7 @@ type FileServerMessage_GetUsageQuery struct {
 func (x *FileServerMessage_GetUsageQuery) Reset() {
 	*x = FileServerMessage_GetUsageQuery{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[26]
+		mi := &file_bfsp_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1750,7 +1858,7 @@ func (x *FileServerMessage_GetUsageQuery) String() string {
 func (*FileServerMessage_GetUsageQuery) ProtoMessage() {}
 
 func (x *FileServerMessage_GetUsageQuery) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[26]
+	mi := &file_bfsp_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1763,7 +1871,7 @@ func (x *FileServerMessage_GetUsageQuery) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FileServerMessage_GetUsageQuery.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_GetUsageQuery) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 10}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 11}
 }
 
 type FileServerMessage_SetMasterEncryptionKey struct {
@@ -1777,7 +1885,7 @@ type FileServerMessage_SetMasterEncryptionKey struct {
 func (x *FileServerMessage_SetMasterEncryptionKey) Reset() {
 	*x = FileServerMessage_SetMasterEncryptionKey{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[27]
+		mi := &file_bfsp_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1790,7 +1898,7 @@ func (x *FileServerMessage_SetMasterEncryptionKey) String() string {
 func (*FileServerMessage_SetMasterEncryptionKey) ProtoMessage() {}
 
 func (x *FileServerMessage_SetMasterEncryptionKey) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[27]
+	mi := &file_bfsp_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1803,7 +1911,7 @@ func (x *FileServerMessage_SetMasterEncryptionKey) ProtoReflect() protoreflect.M
 
 // Deprecated: Use FileServerMessage_SetMasterEncryptionKey.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_SetMasterEncryptionKey) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 11}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 12}
 }
 
 func (x *FileServerMessage_SetMasterEncryptionKey) GetEncryptedKey() []byte {
@@ -1822,7 +1930,7 @@ type FileServerMessage_GetMasterEncryptionKey struct {
 func (x *FileServerMessage_GetMasterEncryptionKey) Reset() {
 	*x = FileServerMessage_GetMasterEncryptionKey{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[28]
+		mi := &file_bfsp_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1835,7 +1943,7 @@ func (x *FileServerMessage_GetMasterEncryptionKey) String() string {
 func (*FileServerMessage_GetMasterEncryptionKey) ProtoMessage() {}
 
 func (x *FileServerMessage_GetMasterEncryptionKey) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[28]
+	mi := &file_bfsp_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1848,7 +1956,7 @@ func (x *FileServerMessage_GetMasterEncryptionKey) ProtoReflect() protoreflect.M
 
 // Deprecated: Use FileServerMessage_GetMasterEncryptionKey.ProtoReflect.Descriptor instead.
 func (*FileServerMessage_GetMasterEncryptionKey) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{1, 12}
+	return file_bfsp_proto_rawDescGZIP(), []int{1, 13}
 }
 
 type DownloadChunkResp_ChunkData struct {
@@ -1865,7 +1973,7 @@ type DownloadChunkResp_ChunkData struct {
 func (x *DownloadChunkResp_ChunkData) Reset() {
 	*x = DownloadChunkResp_ChunkData{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[29]
+		mi := &file_bfsp_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1878,7 +1986,7 @@ func (x *DownloadChunkResp_ChunkData) String() string {
 func (*DownloadChunkResp_ChunkData) ProtoMessage() {}
 
 func (x *DownloadChunkResp_ChunkData) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[29]
+	mi := &file_bfsp_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1928,7 +2036,7 @@ type ChunksUploadedQueryResp_ChunkUploaded struct {
 func (x *ChunksUploadedQueryResp_ChunkUploaded) Reset() {
 	*x = ChunksUploadedQueryResp_ChunkUploaded{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[30]
+		mi := &file_bfsp_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1941,7 +2049,7 @@ func (x *ChunksUploadedQueryResp_ChunkUploaded) String() string {
 func (*ChunksUploadedQueryResp_ChunkUploaded) ProtoMessage() {}
 
 func (x *ChunksUploadedQueryResp_ChunkUploaded) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[30]
+	mi := &file_bfsp_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1982,7 +2090,7 @@ type ChunksUploadedQueryResp_ChunksUploaded struct {
 func (x *ChunksUploadedQueryResp_ChunksUploaded) Reset() {
 	*x = ChunksUploadedQueryResp_ChunksUploaded{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[31]
+		mi := &file_bfsp_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1995,7 +2103,7 @@ func (x *ChunksUploadedQueryResp_ChunksUploaded) String() string {
 func (*ChunksUploadedQueryResp_ChunksUploaded) ProtoMessage() {}
 
 func (x *ChunksUploadedQueryResp_ChunksUploaded) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[31]
+	mi := &file_bfsp_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2029,7 +2137,7 @@ type ListFileMetadataResp_FileMetadatas struct {
 func (x *ListFileMetadataResp_FileMetadatas) Reset() {
 	*x = ListFileMetadataResp_FileMetadatas{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[32]
+		mi := &file_bfsp_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2042,7 +2150,7 @@ func (x *ListFileMetadataResp_FileMetadatas) String() string {
 func (*ListFileMetadataResp_FileMetadatas) ProtoMessage() {}
 
 func (x *ListFileMetadataResp_FileMetadatas) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[32]
+	mi := &file_bfsp_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2055,7 +2163,7 @@ func (x *ListFileMetadataResp_FileMetadatas) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ListFileMetadataResp_FileMetadatas.ProtoReflect.Descriptor instead.
 func (*ListFileMetadataResp_FileMetadatas) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{9, 0}
+	return file_bfsp_proto_rawDescGZIP(), []int{10, 0}
 }
 
 func (x *ListFileMetadataResp_FileMetadatas) GetMetadatas() map[string]*EncryptedFileMetadata {
@@ -2076,7 +2184,7 @@ type ListChunkMetadataResp_ChunkMetadatas struct {
 func (x *ListChunkMetadataResp_ChunkMetadatas) Reset() {
 	*x = ListChunkMetadataResp_ChunkMetadatas{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[34]
+		mi := &file_bfsp_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2089,7 +2197,7 @@ func (x *ListChunkMetadataResp_ChunkMetadatas) String() string {
 func (*ListChunkMetadataResp_ChunkMetadatas) ProtoMessage() {}
 
 func (x *ListChunkMetadataResp_ChunkMetadatas) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[34]
+	mi := &file_bfsp_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2102,7 +2210,7 @@ func (x *ListChunkMetadataResp_ChunkMetadatas) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ListChunkMetadataResp_ChunkMetadatas.ProtoReflect.Descriptor instead.
 func (*ListChunkMetadataResp_ChunkMetadatas) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{10, 0}
+	return file_bfsp_proto_rawDescGZIP(), []int{11, 0}
 }
 
 func (x *ListChunkMetadataResp_ChunkMetadatas) GetMetadatas() map[string]*ChunkMetadata {
@@ -2124,7 +2232,7 @@ type GetUsageResp_Usage struct {
 func (x *GetUsageResp_Usage) Reset() {
 	*x = GetUsageResp_Usage{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_bfsp_proto_msgTypes[36]
+		mi := &file_bfsp_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2137,7 +2245,7 @@ func (x *GetUsageResp_Usage) String() string {
 func (*GetUsageResp_Usage) ProtoMessage() {}
 
 func (x *GetUsageResp_Usage) ProtoReflect() protoreflect.Message {
-	mi := &file_bfsp_proto_msgTypes[36]
+	mi := &file_bfsp_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2150,7 +2258,7 @@ func (x *GetUsageResp_Usage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUsageResp_Usage.ProtoReflect.Descriptor instead.
 func (*GetUsageResp_Usage) Descriptor() ([]byte, []int) {
-	return file_bfsp_proto_rawDescGZIP(), []int{11, 0}
+	return file_bfsp_proto_rawDescGZIP(), []int{12, 0}
 }
 
 func (x *GetUsageResp_Usage) GetTotalUsage() uint64 {
@@ -2175,7 +2283,7 @@ var file_bfsp_proto_rawDesc = []byte{
 	0x79, 0x70, 0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
 	0x61, 0x12, 0x1a, 0x0a, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x0c, 0x52, 0x08, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x0e, 0x0a,
-	0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0xb7, 0x10,
+	0x02, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x22, 0x8e, 0x12,
 	0x0a, 0x11, 0x46, 0x69, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73,
 	0x61, 0x67, 0x65, 0x12, 0x40, 0x0a, 0x04, 0x61, 0x75, 0x74, 0x68, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x0b, 0x32, 0x2c, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x46,
@@ -2258,67 +2366,14 @@ var file_bfsp_proto_rawDesc = []byte{
 	0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x2e, 0x47,
 	0x65, 0x74, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x69,
 	0x6f, 0x6e, 0x4b, 0x65, 0x79, 0x48, 0x00, 0x52, 0x0c, 0x67, 0x65, 0x74, 0x4d, 0x61, 0x73, 0x74,
-	0x65, 0x72, 0x4b, 0x65, 0x79, 0x1a, 0xbb, 0x01, 0x0a, 0x0b, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64,
-	0x43, 0x68, 0x75, 0x6e, 0x6b, 0x12, 0x44, 0x0a, 0x0e, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x6d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e,
-	0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x42, 0x02, 0x18, 0x01, 0x52, 0x0d, 0x63, 0x68,
-	0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x14, 0x0a, 0x05, 0x63,
-	0x68, 0x75, 0x6e, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x05, 0x63, 0x68, 0x75, 0x6e,
-	0x6b, 0x12, 0x50, 0x0a, 0x12, 0x65, 0x6e, 0x63, 0x5f, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x6d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e,
-	0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79,
-	0x70, 0x74, 0x65, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
-	0x61, 0x52, 0x10, 0x65, 0x6e, 0x63, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64,
-	0x61, 0x74, 0x61, 0x1a, 0x32, 0x0a, 0x13, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c,
-	0x6f, 0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x68,
-	0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x63,
-	0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x73, 0x1a, 0x2a, 0x0a, 0x16, 0x4c, 0x69, 0x73, 0x74, 0x43,
-	0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65, 0x72,
-	0x79, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03,
-	0x69, 0x64, 0x73, 0x1a, 0x2f, 0x0a, 0x12, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43,
-	0x68, 0x75, 0x6e, 0x6b, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x68, 0x75,
-	0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x68, 0x75,
-	0x6e, 0x6b, 0x49, 0x64, 0x1a, 0x30, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x68,
-	0x75, 0x6e, 0x6b, 0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x1b, 0x0a, 0x09, 0x63, 0x68, 0x75,
-	0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x08, 0x63, 0x68,
-	0x75, 0x6e, 0x6b, 0x49, 0x64, 0x73, 0x1a, 0x26, 0x0a, 0x0e, 0x41, 0x75, 0x74, 0x68, 0x65, 0x6e,
-	0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65,
-	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x1a, 0x6f,
-	0x0a, 0x12, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61,
-	0x64, 0x61, 0x74, 0x61, 0x12, 0x59, 0x0a, 0x17, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65,
-	0x64, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c,
-	0x65, 0x73, 0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x15, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70,
-	0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x1a,
-	0x2b, 0x0a, 0x19, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d,
-	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x0e, 0x0a, 0x02,
-	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x1a, 0x29, 0x0a, 0x15,
-	0x4c, 0x69, 0x73, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
-	0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x09, 0x52, 0x03, 0x69, 0x64, 0x73, 0x1a, 0x29, 0x0a, 0x17, 0x44, 0x65, 0x6c, 0x65, 0x74,
-	0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65,
-	0x72, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02,
-	0x69, 0x64, 0x1a, 0x0f, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x55, 0x73, 0x61, 0x67, 0x65, 0x51, 0x75,
-	0x65, 0x72, 0x79, 0x1a, 0x3d, 0x0a, 0x16, 0x53, 0x65, 0x74, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72,
-	0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x4b, 0x65, 0x79, 0x12, 0x23, 0x0a,
-	0x0d, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x0c, 0x52, 0x0c, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x4b,
-	0x65, 0x79, 0x1a, 0x18, 0x0a, 0x16, 0x47, 0x65, 0x74, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x45,
-	0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x4b, 0x65, 0x79, 0x42, 0x09, 0x0a, 0x07,
-	0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x30, 0x0a, 0x0f, 0x55, 0x70, 0x6c, 0x6f, 0x61,
-	0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72,
-	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01,
-	0x01, 0x42, 0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72, 0x22, 0xb9, 0x02, 0x0a, 0x11, 0x44, 0x6f,
-	0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x12,
-	0x48, 0x0a, 0x0a, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73,
-	0x2e, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x52, 0x65,
-	0x73, 0x70, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61, 0x74, 0x61, 0x48, 0x00, 0x52, 0x09,
-	0x63, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a, 0x03, 0x65, 0x72, 0x72,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x1a, 0xb9, 0x01,
-	0x0a, 0x09, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61, 0x74, 0x61, 0x12, 0x44, 0x0a, 0x0e, 0x63,
+	0x65, 0x72, 0x4b, 0x65, 0x79, 0x12, 0x64, 0x0a, 0x14, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x5f,
+	0x66, 0x69, 0x6c, 0x65, 0x5f, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x0e, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x30, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73,
+	0x2e, 0x46, 0x69, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x4d, 0x65, 0x73, 0x73, 0x61,
+	0x67, 0x65, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x48, 0x00, 0x52, 0x12, 0x75, 0x70, 0x64, 0x61, 0x74, 0x65, 0x46,
+	0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x1a, 0xbb, 0x01, 0x0a, 0x0b,
+	0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x12, 0x44, 0x0a, 0x0e, 0x63,
 	0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x6d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73,
 	0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x42, 0x02,
@@ -2329,34 +2384,104 @@ var file_bfsp_proto_rawDesc = []byte{
 	0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73,
 	0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d,
 	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x10, 0x65, 0x6e, 0x63, 0x43, 0x68, 0x75, 0x6e,
-	0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x42, 0x0a, 0x0a, 0x08, 0x72, 0x65, 0x73,
-	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xac, 0x02, 0x0a, 0x17, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73,
-	0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73,
-	0x70, 0x12, 0x4c, 0x0a, 0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x32, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x43,
-	0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65,
-	0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c,
-	0x6f, 0x61, 0x64, 0x65, 0x64, 0x48, 0x00, 0x52, 0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x12,
-	0x12, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03,
-	0x65, 0x72, 0x72, 0x1a, 0x46, 0x0a, 0x0d, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x55, 0x70, 0x6c, 0x6f,
-	0x61, 0x64, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x12,
-	0x1a, 0x0a, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x08, 0x52, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x1a, 0x5b, 0x0a, 0x0e, 0x43,
-	0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x12, 0x49, 0x0a,
-	0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x31, 0x2e,
-	0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b,
-	0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65,
-	0x73, 0x70, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64,
-	0x52, 0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x42, 0x0a, 0x0a, 0x08, 0x72, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x31, 0x0a, 0x10, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x68,
-	0x75, 0x6e, 0x6b, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01, 0x01, 0x42,
-	0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72, 0x22, 0x37, 0x0a, 0x16, 0x44, 0x65, 0x6c, 0x65, 0x74,
-	0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73,
+	0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x32, 0x0a, 0x13, 0x43, 0x68, 0x75,
+	0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65, 0x72, 0x79,
+	0x12, 0x1b, 0x0a, 0x09, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x08, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x73, 0x1a, 0x2a, 0x0a,
+	0x16, 0x4c, 0x69, 0x73, 0x74, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x69, 0x64, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x69, 0x64, 0x73, 0x1a, 0x2f, 0x0a, 0x12, 0x44, 0x6f, 0x77,
+	0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12,
+	0x19, 0x0a, 0x08, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x07, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x1a, 0x30, 0x0a, 0x11, 0x44, 0x65,
+	0x6c, 0x65, 0x74, 0x65, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12,
+	0x1b, 0x0a, 0x09, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03,
+	0x28, 0x09, 0x52, 0x08, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x73, 0x1a, 0x26, 0x0a, 0x0e,
+	0x41, 0x75, 0x74, 0x68, 0x65, 0x6e, 0x74, 0x69, 0x63, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x14,
+	0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74,
+	0x6f, 0x6b, 0x65, 0x6e, 0x1a, 0x6f, 0x0a, 0x12, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x46, 0x69,
+	0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x59, 0x0a, 0x17, 0x65, 0x6e,
+	0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x6d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x62, 0x66,
+	0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74,
+	0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x15,
+	0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x6f, 0x0a, 0x12, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x46,
+	0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x59, 0x0a, 0x17, 0x65,
+	0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x5f, 0x6d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x62,
+	0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70,
+	0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52,
+	0x15, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65,
+	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x1a, 0x2b, 0x0a, 0x19, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f,
+	0x61, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x51, 0x75,
+	0x65, 0x72, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x02, 0x69, 0x64, 0x1a, 0x29, 0x0a, 0x15, 0x4c, 0x69, 0x73, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x4d,
+	0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03,
+	0x69, 0x64, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x03, 0x69, 0x64, 0x73, 0x1a, 0x29,
+	0x0a, 0x17, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x51, 0x75, 0x65, 0x72, 0x79, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x1a, 0x0f, 0x0a, 0x0d, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x61, 0x67, 0x65, 0x51, 0x75, 0x65, 0x72, 0x79, 0x1a, 0x3d, 0x0a, 0x16, 0x53, 0x65,
+	0x74, 0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x4b, 0x65, 0x79, 0x12, 0x23, 0x0a, 0x0d, 0x65, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65,
+	0x64, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x0c, 0x65, 0x6e, 0x63,
+	0x72, 0x79, 0x70, 0x74, 0x65, 0x64, 0x4b, 0x65, 0x79, 0x1a, 0x18, 0x0a, 0x16, 0x47, 0x65, 0x74,
+	0x4d, 0x61, 0x73, 0x74, 0x65, 0x72, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x69, 0x6f, 0x6e,
+	0x4b, 0x65, 0x79, 0x42, 0x09, 0x0a, 0x07, 0x6d, 0x65, 0x73, 0x73, 0x61, 0x67, 0x65, 0x22, 0x30,
+	0x0a, 0x0f, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x52, 0x65, 0x73,
 	0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00,
 	0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01, 0x01, 0x42, 0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72,
-	0x22, 0x37, 0x0a, 0x16, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65,
+	0x22, 0xb9, 0x02, 0x0a, 0x11, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64, 0x43, 0x68, 0x75,
+	0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x12, 0x48, 0x0a, 0x0a, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x62, 0x66, 0x73,
+	0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x44, 0x6f, 0x77, 0x6e, 0x6c, 0x6f, 0x61, 0x64,
+	0x43, 0x68, 0x75, 0x6e, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x44,
+	0x61, 0x74, 0x61, 0x48, 0x00, 0x52, 0x09, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61, 0x74, 0x61,
+	0x12, 0x12, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52,
+	0x03, 0x65, 0x72, 0x72, 0x1a, 0xb9, 0x01, 0x0a, 0x09, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x44, 0x61,
+	0x74, 0x61, 0x12, 0x44, 0x0a, 0x0e, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x6d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x62, 0x66, 0x73,
+	0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74,
+	0x61, 0x64, 0x61, 0x74, 0x61, 0x42, 0x02, 0x18, 0x01, 0x52, 0x0d, 0x63, 0x68, 0x75, 0x6e, 0x6b,
+	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x12, 0x14, 0x0a, 0x05, 0x63, 0x68, 0x75, 0x6e,
+	0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x05, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x12, 0x50,
+	0x0a, 0x12, 0x65, 0x6e, 0x63, 0x5f, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x6d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x62, 0x66, 0x73,
+	0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x45, 0x6e, 0x63, 0x72, 0x79, 0x70, 0x74, 0x65,
+	0x64, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x10,
+	0x65, 0x6e, 0x63, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61,
+	0x42, 0x0a, 0x0a, 0x08, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0xac, 0x02, 0x0a,
+	0x17, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x51,
+	0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4c, 0x0a, 0x06, 0x63, 0x68, 0x75, 0x6e,
+	0x6b, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x32, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e,
+	0x66, 0x69, 0x6c, 0x65, 0x73, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f,
+	0x61, 0x64, 0x65, 0x64, 0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x2e, 0x43, 0x68,
+	0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x48, 0x00, 0x52, 0x06,
+	0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x12, 0x12, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x1a, 0x46, 0x0a, 0x0d, 0x43, 0x68,
+	0x75, 0x6e, 0x6b, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x12, 0x19, 0x0a, 0x08, 0x63,
+	0x68, 0x75, 0x6e, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x63,
+	0x68, 0x75, 0x6e, 0x6b, 0x49, 0x64, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64,
+	0x65, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x75, 0x70, 0x6c, 0x6f, 0x61, 0x64,
+	0x65, 0x64, 0x1a, 0x5b, 0x0a, 0x0e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f,
+	0x61, 0x64, 0x65, 0x64, 0x12, 0x49, 0x0a, 0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x18, 0x01,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x31, 0x2e, 0x62, 0x66, 0x73, 0x70, 0x2e, 0x66, 0x69, 0x6c, 0x65,
+	0x73, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x55, 0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64,
+	0x51, 0x75, 0x65, 0x72, 0x79, 0x52, 0x65, 0x73, 0x70, 0x2e, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x55,
+	0x70, 0x6c, 0x6f, 0x61, 0x64, 0x65, 0x64, 0x52, 0x06, 0x63, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x42,
+	0x0a, 0x0a, 0x08, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x31, 0x0a, 0x10, 0x44,
+	0x65, 0x6c, 0x65, 0x74, 0x65, 0x43, 0x68, 0x75, 0x6e, 0x6b, 0x73, 0x52, 0x65, 0x73, 0x70, 0x12,
+	0x15, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03,
+	0x65, 0x72, 0x72, 0x88, 0x01, 0x01, 0x42, 0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72, 0x22, 0x37,
+	0x0a, 0x16, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61,
+	0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01, 0x01, 0x42,
+	0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72, 0x22, 0x37, 0x0a, 0x16, 0x55, 0x70, 0x6c, 0x6f, 0x61,
+	0x64, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00,
+	0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01, 0x01, 0x42, 0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72,
+	0x22, 0x37, 0x0a, 0x16, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x4d, 0x65,
 	0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0x52, 0x65, 0x73, 0x70, 0x12, 0x15, 0x0a, 0x03, 0x65, 0x72,
 	0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x48, 0x00, 0x52, 0x03, 0x65, 0x72, 0x72, 0x88, 0x01,
 	0x01, 0x42, 0x06, 0x0a, 0x04, 0x5f, 0x65, 0x72, 0x72, 0x22, 0x97, 0x01, 0x0a, 0x18, 0x44, 0x6f,
@@ -2461,7 +2586,7 @@ func file_bfsp_proto_rawDescGZIP() []byte {
 	return file_bfsp_proto_rawDescData
 }
 
-var file_bfsp_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_bfsp_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
 var file_bfsp_proto_goTypes = []any{
 	(*EncryptedFileMetadata)(nil),                       // 0: bfsp.files.EncryptedFileMetadata
 	(*FileServerMessage)(nil),                           // 1: bfsp.files.FileServerMessage
@@ -2471,71 +2596,75 @@ var file_bfsp_proto_goTypes = []any{
 	(*DeleteChunksResp)(nil),                            // 5: bfsp.files.DeleteChunksResp
 	(*DeleteFileMetadataResp)(nil),                      // 6: bfsp.files.DeleteFileMetadataResp
 	(*UploadFileMetadataResp)(nil),                      // 7: bfsp.files.UploadFileMetadataResp
-	(*DownloadFileMetadataResp)(nil),                    // 8: bfsp.files.DownloadFileMetadataResp
-	(*ListFileMetadataResp)(nil),                        // 9: bfsp.files.ListFileMetadataResp
-	(*ListChunkMetadataResp)(nil),                       // 10: bfsp.files.ListChunkMetadataResp
-	(*GetUsageResp)(nil),                                // 11: bfsp.files.GetUsageResp
-	(*SetMasterEncryptionKeyResp)(nil),                  // 12: bfsp.files.SetMasterEncryptionKeyResp
-	(*GetMasterEncryptionKeyResp)(nil),                  // 13: bfsp.files.GetMasterEncryptionKeyResp
-	(*EncryptedChunkMetadata)(nil),                      // 14: bfsp.files.EncryptedChunkMetadata
-	(*ChunkMetadata)(nil),                               // 15: bfsp.files.ChunkMetadata
-	(*FileServerMessage_UploadChunk)(nil),               // 16: bfsp.files.FileServerMessage.UploadChunk
-	(*FileServerMessage_ChunksUploadedQuery)(nil),       // 17: bfsp.files.FileServerMessage.ChunksUploadedQuery
-	(*FileServerMessage_ListChunkMetadataQuery)(nil),    // 18: bfsp.files.FileServerMessage.ListChunkMetadataQuery
-	(*FileServerMessage_DownloadChunkQuery)(nil),        // 19: bfsp.files.FileServerMessage.DownloadChunkQuery
-	(*FileServerMessage_DeleteChunksQuery)(nil),         // 20: bfsp.files.FileServerMessage.DeleteChunksQuery
-	(*FileServerMessage_Authentication)(nil),            // 21: bfsp.files.FileServerMessage.Authentication
-	(*FileServerMessage_UploadFileMetadata)(nil),        // 22: bfsp.files.FileServerMessage.UploadFileMetadata
-	(*FileServerMessage_DownloadFileMetadataQuery)(nil), // 23: bfsp.files.FileServerMessage.DownloadFileMetadataQuery
-	(*FileServerMessage_ListFileMetadataQuery)(nil),     // 24: bfsp.files.FileServerMessage.ListFileMetadataQuery
-	(*FileServerMessage_DeleteFileMetadataQuery)(nil),   // 25: bfsp.files.FileServerMessage.DeleteFileMetadataQuery
-	(*FileServerMessage_GetUsageQuery)(nil),             // 26: bfsp.files.FileServerMessage.GetUsageQuery
-	(*FileServerMessage_SetMasterEncryptionKey)(nil),    // 27: bfsp.files.FileServerMessage.SetMasterEncryptionKey
-	(*FileServerMessage_GetMasterEncryptionKey)(nil),    // 28: bfsp.files.FileServerMessage.GetMasterEncryptionKey
-	(*DownloadChunkResp_ChunkData)(nil),                 // 29: bfsp.files.DownloadChunkResp.ChunkData
-	(*ChunksUploadedQueryResp_ChunkUploaded)(nil),       // 30: bfsp.files.ChunksUploadedQueryResp.ChunkUploaded
-	(*ChunksUploadedQueryResp_ChunksUploaded)(nil),      // 31: bfsp.files.ChunksUploadedQueryResp.ChunksUploaded
-	(*ListFileMetadataResp_FileMetadatas)(nil),          // 32: bfsp.files.ListFileMetadataResp.FileMetadatas
-	nil, // 33: bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry
-	(*ListChunkMetadataResp_ChunkMetadatas)(nil), // 34: bfsp.files.ListChunkMetadataResp.ChunkMetadatas
-	nil,                        // 35: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry
-	(*GetUsageResp_Usage)(nil), // 36: bfsp.files.GetUsageResp.Usage
+	(*UpdateFileMetadataResp)(nil),                      // 8: bfsp.files.UpdateFileMetadataResp
+	(*DownloadFileMetadataResp)(nil),                    // 9: bfsp.files.DownloadFileMetadataResp
+	(*ListFileMetadataResp)(nil),                        // 10: bfsp.files.ListFileMetadataResp
+	(*ListChunkMetadataResp)(nil),                       // 11: bfsp.files.ListChunkMetadataResp
+	(*GetUsageResp)(nil),                                // 12: bfsp.files.GetUsageResp
+	(*SetMasterEncryptionKeyResp)(nil),                  // 13: bfsp.files.SetMasterEncryptionKeyResp
+	(*GetMasterEncryptionKeyResp)(nil),                  // 14: bfsp.files.GetMasterEncryptionKeyResp
+	(*EncryptedChunkMetadata)(nil),                      // 15: bfsp.files.EncryptedChunkMetadata
+	(*ChunkMetadata)(nil),                               // 16: bfsp.files.ChunkMetadata
+	(*FileServerMessage_UploadChunk)(nil),               // 17: bfsp.files.FileServerMessage.UploadChunk
+	(*FileServerMessage_ChunksUploadedQuery)(nil),       // 18: bfsp.files.FileServerMessage.ChunksUploadedQuery
+	(*FileServerMessage_ListChunkMetadataQuery)(nil),    // 19: bfsp.files.FileServerMessage.ListChunkMetadataQuery
+	(*FileServerMessage_DownloadChunkQuery)(nil),        // 20: bfsp.files.FileServerMessage.DownloadChunkQuery
+	(*FileServerMessage_DeleteChunksQuery)(nil),         // 21: bfsp.files.FileServerMessage.DeleteChunksQuery
+	(*FileServerMessage_Authentication)(nil),            // 22: bfsp.files.FileServerMessage.Authentication
+	(*FileServerMessage_UploadFileMetadata)(nil),        // 23: bfsp.files.FileServerMessage.UploadFileMetadata
+	(*FileServerMessage_UpdateFileMetadata)(nil),        // 24: bfsp.files.FileServerMessage.UpdateFileMetadata
+	(*FileServerMessage_DownloadFileMetadataQuery)(nil), // 25: bfsp.files.FileServerMessage.DownloadFileMetadataQuery
+	(*FileServerMessage_ListFileMetadataQuery)(nil),     // 26: bfsp.files.FileServerMessage.ListFileMetadataQuery
+	(*FileServerMessage_DeleteFileMetadataQuery)(nil),   // 27: bfsp.files.FileServerMessage.DeleteFileMetadataQuery
+	(*FileServerMessage_GetUsageQuery)(nil),             // 28: bfsp.files.FileServerMessage.GetUsageQuery
+	(*FileServerMessage_SetMasterEncryptionKey)(nil),    // 29: bfsp.files.FileServerMessage.SetMasterEncryptionKey
+	(*FileServerMessage_GetMasterEncryptionKey)(nil),    // 30: bfsp.files.FileServerMessage.GetMasterEncryptionKey
+	(*DownloadChunkResp_ChunkData)(nil),                 // 31: bfsp.files.DownloadChunkResp.ChunkData
+	(*ChunksUploadedQueryResp_ChunkUploaded)(nil),       // 32: bfsp.files.ChunksUploadedQueryResp.ChunkUploaded
+	(*ChunksUploadedQueryResp_ChunksUploaded)(nil),      // 33: bfsp.files.ChunksUploadedQueryResp.ChunksUploaded
+	(*ListFileMetadataResp_FileMetadatas)(nil),          // 34: bfsp.files.ListFileMetadataResp.FileMetadatas
+	nil, // 35: bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry
+	(*ListChunkMetadataResp_ChunkMetadatas)(nil), // 36: bfsp.files.ListChunkMetadataResp.ChunkMetadatas
+	nil,                        // 37: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry
+	(*GetUsageResp_Usage)(nil), // 38: bfsp.files.GetUsageResp.Usage
 }
 var file_bfsp_proto_depIdxs = []int32{
-	21, // 0: bfsp.files.FileServerMessage.auth:type_name -> bfsp.files.FileServerMessage.Authentication
-	16, // 1: bfsp.files.FileServerMessage.upload_chunk:type_name -> bfsp.files.FileServerMessage.UploadChunk
-	17, // 2: bfsp.files.FileServerMessage.chunks_uploaded_query:type_name -> bfsp.files.FileServerMessage.ChunksUploadedQuery
-	19, // 3: bfsp.files.FileServerMessage.download_chunk_query:type_name -> bfsp.files.FileServerMessage.DownloadChunkQuery
-	20, // 4: bfsp.files.FileServerMessage.delete_chunks_query:type_name -> bfsp.files.FileServerMessage.DeleteChunksQuery
-	22, // 5: bfsp.files.FileServerMessage.upload_file_metadata:type_name -> bfsp.files.FileServerMessage.UploadFileMetadata
-	23, // 6: bfsp.files.FileServerMessage.download_file_metadata_query:type_name -> bfsp.files.FileServerMessage.DownloadFileMetadataQuery
-	24, // 7: bfsp.files.FileServerMessage.list_file_metadata_query:type_name -> bfsp.files.FileServerMessage.ListFileMetadataQuery
-	18, // 8: bfsp.files.FileServerMessage.list_chunk_metadata_query:type_name -> bfsp.files.FileServerMessage.ListChunkMetadataQuery
-	25, // 9: bfsp.files.FileServerMessage.delete_file_metadata_query:type_name -> bfsp.files.FileServerMessage.DeleteFileMetadataQuery
-	26, // 10: bfsp.files.FileServerMessage.get_usage_query:type_name -> bfsp.files.FileServerMessage.GetUsageQuery
-	27, // 11: bfsp.files.FileServerMessage.set_master_key:type_name -> bfsp.files.FileServerMessage.SetMasterEncryptionKey
-	28, // 12: bfsp.files.FileServerMessage.get_master_key:type_name -> bfsp.files.FileServerMessage.GetMasterEncryptionKey
-	29, // 13: bfsp.files.DownloadChunkResp.chunk_data:type_name -> bfsp.files.DownloadChunkResp.ChunkData
-	31, // 14: bfsp.files.ChunksUploadedQueryResp.chunks:type_name -> bfsp.files.ChunksUploadedQueryResp.ChunksUploaded
-	0,  // 15: bfsp.files.DownloadFileMetadataResp.encrypted_file_metadata:type_name -> bfsp.files.EncryptedFileMetadata
-	32, // 16: bfsp.files.ListFileMetadataResp.metadatas:type_name -> bfsp.files.ListFileMetadataResp.FileMetadatas
-	34, // 17: bfsp.files.ListChunkMetadataResp.metadatas:type_name -> bfsp.files.ListChunkMetadataResp.ChunkMetadatas
-	36, // 18: bfsp.files.GetUsageResp.usage:type_name -> bfsp.files.GetUsageResp.Usage
-	15, // 19: bfsp.files.FileServerMessage.UploadChunk.chunk_metadata:type_name -> bfsp.files.ChunkMetadata
-	14, // 20: bfsp.files.FileServerMessage.UploadChunk.enc_chunk_metadata:type_name -> bfsp.files.EncryptedChunkMetadata
-	0,  // 21: bfsp.files.FileServerMessage.UploadFileMetadata.encrypted_file_metadata:type_name -> bfsp.files.EncryptedFileMetadata
-	15, // 22: bfsp.files.DownloadChunkResp.ChunkData.chunk_metadata:type_name -> bfsp.files.ChunkMetadata
-	14, // 23: bfsp.files.DownloadChunkResp.ChunkData.enc_chunk_metadata:type_name -> bfsp.files.EncryptedChunkMetadata
-	30, // 24: bfsp.files.ChunksUploadedQueryResp.ChunksUploaded.chunks:type_name -> bfsp.files.ChunksUploadedQueryResp.ChunkUploaded
-	33, // 25: bfsp.files.ListFileMetadataResp.FileMetadatas.metadatas:type_name -> bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry
-	0,  // 26: bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry.value:type_name -> bfsp.files.EncryptedFileMetadata
-	35, // 27: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.metadatas:type_name -> bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry
-	15, // 28: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry.value:type_name -> bfsp.files.ChunkMetadata
-	29, // [29:29] is the sub-list for method output_type
-	29, // [29:29] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	22, // 0: bfsp.files.FileServerMessage.auth:type_name -> bfsp.files.FileServerMessage.Authentication
+	17, // 1: bfsp.files.FileServerMessage.upload_chunk:type_name -> bfsp.files.FileServerMessage.UploadChunk
+	18, // 2: bfsp.files.FileServerMessage.chunks_uploaded_query:type_name -> bfsp.files.FileServerMessage.ChunksUploadedQuery
+	20, // 3: bfsp.files.FileServerMessage.download_chunk_query:type_name -> bfsp.files.FileServerMessage.DownloadChunkQuery
+	21, // 4: bfsp.files.FileServerMessage.delete_chunks_query:type_name -> bfsp.files.FileServerMessage.DeleteChunksQuery
+	23, // 5: bfsp.files.FileServerMessage.upload_file_metadata:type_name -> bfsp.files.FileServerMessage.UploadFileMetadata
+	25, // 6: bfsp.files.FileServerMessage.download_file_metadata_query:type_name -> bfsp.files.FileServerMessage.DownloadFileMetadataQuery
+	26, // 7: bfsp.files.FileServerMessage.list_file_metadata_query:type_name -> bfsp.files.FileServerMessage.ListFileMetadataQuery
+	19, // 8: bfsp.files.FileServerMessage.list_chunk_metadata_query:type_name -> bfsp.files.FileServerMessage.ListChunkMetadataQuery
+	27, // 9: bfsp.files.FileServerMessage.delete_file_metadata_query:type_name -> bfsp.files.FileServerMessage.DeleteFileMetadataQuery
+	28, // 10: bfsp.files.FileServerMessage.get_usage_query:type_name -> bfsp.files.FileServerMessage.GetUsageQuery
+	29, // 11: bfsp.files.FileServerMessage.set_master_key:type_name -> bfsp.files.FileServerMessage.SetMasterEncryptionKey
+	30, // 12: bfsp.files.FileServerMessage.get_master_key:type_name -> bfsp.files.FileServerMessage.GetMasterEncryptionKey
+	24, // 13: bfsp.files.FileServerMessage.update_file_metadata:type_name -> bfsp.files.FileServerMessage.UpdateFileMetadata
+	31, // 14: bfsp.files.DownloadChunkResp.chunk_data:type_name -> bfsp.files.DownloadChunkResp.ChunkData
+	33, // 15: bfsp.files.ChunksUploadedQueryResp.chunks:type_name -> bfsp.files.ChunksUploadedQueryResp.ChunksUploaded
+	0,  // 16: bfsp.files.DownloadFileMetadataResp.encrypted_file_metadata:type_name -> bfsp.files.EncryptedFileMetadata
+	34, // 17: bfsp.files.ListFileMetadataResp.metadatas:type_name -> bfsp.files.ListFileMetadataResp.FileMetadatas
+	36, // 18: bfsp.files.ListChunkMetadataResp.metadatas:type_name -> bfsp.files.ListChunkMetadataResp.ChunkMetadatas
+	38, // 19: bfsp.files.GetUsageResp.usage:type_name -> bfsp.files.GetUsageResp.Usage
+	16, // 20: bfsp.files.FileServerMessage.UploadChunk.chunk_metadata:type_name -> bfsp.files.ChunkMetadata
+	15, // 21: bfsp.files.FileServerMessage.UploadChunk.enc_chunk_metadata:type_name -> bfsp.files.EncryptedChunkMetadata
+	0,  // 22: bfsp.files.FileServerMessage.UploadFileMetadata.encrypted_file_metadata:type_name -> bfsp.files.EncryptedFileMetadata
+	0,  // 23: bfsp.files.FileServerMessage.UpdateFileMetadata.encrypted_file_metadata:type_name -> bfsp.files.EncryptedFileMetadata
+	16, // 24: bfsp.files.DownloadChunkResp.ChunkData.chunk_metadata:type_name -> bfsp.files.ChunkMetadata
+	15, // 25: bfsp.files.DownloadChunkResp.ChunkData.enc_chunk_metadata:type_name -> bfsp.files.EncryptedChunkMetadata
+	32, // 26: bfsp.files.ChunksUploadedQueryResp.ChunksUploaded.chunks:type_name -> bfsp.files.ChunksUploadedQueryResp.ChunkUploaded
+	35, // 27: bfsp.files.ListFileMetadataResp.FileMetadatas.metadatas:type_name -> bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry
+	0,  // 28: bfsp.files.ListFileMetadataResp.FileMetadatas.MetadatasEntry.value:type_name -> bfsp.files.EncryptedFileMetadata
+	37, // 29: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.metadatas:type_name -> bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry
+	16, // 30: bfsp.files.ListChunkMetadataResp.ChunkMetadatas.MetadatasEntry.value:type_name -> bfsp.files.ChunkMetadata
+	31, // [31:31] is the sub-list for method output_type
+	31, // [31:31] is the sub-list for method input_type
+	31, // [31:31] is the sub-list for extension type_name
+	31, // [31:31] is the sub-list for extension extendee
+	0,  // [0:31] is the sub-list for field type_name
 }
 
 func init() { file_bfsp_proto_init() }
@@ -2641,7 +2770,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[8].Exporter = func(v any, i int) any {
-			switch v := v.(*DownloadFileMetadataResp); i {
+			switch v := v.(*UpdateFileMetadataResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2653,7 +2782,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[9].Exporter = func(v any, i int) any {
-			switch v := v.(*ListFileMetadataResp); i {
+			switch v := v.(*DownloadFileMetadataResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2665,7 +2794,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[10].Exporter = func(v any, i int) any {
-			switch v := v.(*ListChunkMetadataResp); i {
+			switch v := v.(*ListFileMetadataResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2677,7 +2806,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[11].Exporter = func(v any, i int) any {
-			switch v := v.(*GetUsageResp); i {
+			switch v := v.(*ListChunkMetadataResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2689,7 +2818,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[12].Exporter = func(v any, i int) any {
-			switch v := v.(*SetMasterEncryptionKeyResp); i {
+			switch v := v.(*GetUsageResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2701,7 +2830,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[13].Exporter = func(v any, i int) any {
-			switch v := v.(*GetMasterEncryptionKeyResp); i {
+			switch v := v.(*SetMasterEncryptionKeyResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2713,7 +2842,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[14].Exporter = func(v any, i int) any {
-			switch v := v.(*EncryptedChunkMetadata); i {
+			switch v := v.(*GetMasterEncryptionKeyResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2725,7 +2854,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[15].Exporter = func(v any, i int) any {
-			switch v := v.(*ChunkMetadata); i {
+			switch v := v.(*EncryptedChunkMetadata); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2737,7 +2866,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[16].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_UploadChunk); i {
+			switch v := v.(*ChunkMetadata); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2749,7 +2878,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[17].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_ChunksUploadedQuery); i {
+			switch v := v.(*FileServerMessage_UploadChunk); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2761,7 +2890,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[18].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_ListChunkMetadataQuery); i {
+			switch v := v.(*FileServerMessage_ChunksUploadedQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2773,7 +2902,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[19].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_DownloadChunkQuery); i {
+			switch v := v.(*FileServerMessage_ListChunkMetadataQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2785,7 +2914,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[20].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_DeleteChunksQuery); i {
+			switch v := v.(*FileServerMessage_DownloadChunkQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2797,7 +2926,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[21].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_Authentication); i {
+			switch v := v.(*FileServerMessage_DeleteChunksQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2809,7 +2938,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[22].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_UploadFileMetadata); i {
+			switch v := v.(*FileServerMessage_Authentication); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2821,7 +2950,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[23].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_DownloadFileMetadataQuery); i {
+			switch v := v.(*FileServerMessage_UploadFileMetadata); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2833,7 +2962,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[24].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_ListFileMetadataQuery); i {
+			switch v := v.(*FileServerMessage_UpdateFileMetadata); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2845,7 +2974,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[25].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_DeleteFileMetadataQuery); i {
+			switch v := v.(*FileServerMessage_DownloadFileMetadataQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2857,7 +2986,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[26].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_GetUsageQuery); i {
+			switch v := v.(*FileServerMessage_ListFileMetadataQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2869,7 +2998,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[27].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_SetMasterEncryptionKey); i {
+			switch v := v.(*FileServerMessage_DeleteFileMetadataQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2881,7 +3010,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[28].Exporter = func(v any, i int) any {
-			switch v := v.(*FileServerMessage_GetMasterEncryptionKey); i {
+			switch v := v.(*FileServerMessage_GetUsageQuery); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2893,7 +3022,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[29].Exporter = func(v any, i int) any {
-			switch v := v.(*DownloadChunkResp_ChunkData); i {
+			switch v := v.(*FileServerMessage_SetMasterEncryptionKey); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2905,7 +3034,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[30].Exporter = func(v any, i int) any {
-			switch v := v.(*ChunksUploadedQueryResp_ChunkUploaded); i {
+			switch v := v.(*FileServerMessage_GetMasterEncryptionKey); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2917,7 +3046,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[31].Exporter = func(v any, i int) any {
-			switch v := v.(*ChunksUploadedQueryResp_ChunksUploaded); i {
+			switch v := v.(*DownloadChunkResp_ChunkData); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2929,7 +3058,19 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[32].Exporter = func(v any, i int) any {
-			switch v := v.(*ListFileMetadataResp_FileMetadatas); i {
+			switch v := v.(*ChunksUploadedQueryResp_ChunkUploaded); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bfsp_proto_msgTypes[33].Exporter = func(v any, i int) any {
+			switch v := v.(*ChunksUploadedQueryResp_ChunksUploaded); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2941,7 +3082,7 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[34].Exporter = func(v any, i int) any {
-			switch v := v.(*ListChunkMetadataResp_ChunkMetadatas); i {
+			switch v := v.(*ListFileMetadataResp_FileMetadatas); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2953,6 +3094,18 @@ func file_bfsp_proto_init() {
 			}
 		}
 		file_bfsp_proto_msgTypes[36].Exporter = func(v any, i int) any {
+			switch v := v.(*ListChunkMetadataResp_ChunkMetadatas); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_bfsp_proto_msgTypes[38].Exporter = func(v any, i int) any {
 			switch v := v.(*GetUsageResp_Usage); i {
 			case 0:
 				return &v.state
@@ -2978,6 +3131,7 @@ func file_bfsp_proto_init() {
 		(*FileServerMessage_GetUsageQuery_)(nil),
 		(*FileServerMessage_SetMasterKey)(nil),
 		(*FileServerMessage_GetMasterKey)(nil),
+		(*FileServerMessage_UpdateFileMetadata_)(nil),
 	}
 	file_bfsp_proto_msgTypes[2].OneofWrappers = []any{}
 	file_bfsp_proto_msgTypes[3].OneofWrappers = []any{
@@ -2991,24 +3145,25 @@ func file_bfsp_proto_init() {
 	file_bfsp_proto_msgTypes[5].OneofWrappers = []any{}
 	file_bfsp_proto_msgTypes[6].OneofWrappers = []any{}
 	file_bfsp_proto_msgTypes[7].OneofWrappers = []any{}
-	file_bfsp_proto_msgTypes[8].OneofWrappers = []any{
+	file_bfsp_proto_msgTypes[8].OneofWrappers = []any{}
+	file_bfsp_proto_msgTypes[9].OneofWrappers = []any{
 		(*DownloadFileMetadataResp_EncryptedFileMetadata)(nil),
 		(*DownloadFileMetadataResp_Err)(nil),
 	}
-	file_bfsp_proto_msgTypes[9].OneofWrappers = []any{
+	file_bfsp_proto_msgTypes[10].OneofWrappers = []any{
 		(*ListFileMetadataResp_Metadatas)(nil),
 		(*ListFileMetadataResp_Err)(nil),
 	}
-	file_bfsp_proto_msgTypes[10].OneofWrappers = []any{
+	file_bfsp_proto_msgTypes[11].OneofWrappers = []any{
 		(*ListChunkMetadataResp_Metadatas)(nil),
 		(*ListChunkMetadataResp_Err)(nil),
 	}
-	file_bfsp_proto_msgTypes[11].OneofWrappers = []any{
+	file_bfsp_proto_msgTypes[12].OneofWrappers = []any{
 		(*GetUsageResp_Usage_)(nil),
 		(*GetUsageResp_Err)(nil),
 	}
-	file_bfsp_proto_msgTypes[12].OneofWrappers = []any{}
-	file_bfsp_proto_msgTypes[13].OneofWrappers = []any{
+	file_bfsp_proto_msgTypes[13].OneofWrappers = []any{}
+	file_bfsp_proto_msgTypes[14].OneofWrappers = []any{
 		(*GetMasterEncryptionKeyResp_EncryptedKey)(nil),
 		(*GetMasterEncryptionKeyResp_Err)(nil),
 	}
@@ -3018,7 +3173,7 @@ func file_bfsp_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_bfsp_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   37,
+			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

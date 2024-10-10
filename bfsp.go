@@ -275,6 +275,59 @@ func UploadFileMetadata(cli FileServerClient, fileMeta *FileMetadata, masterKey 
 	return nil
 }
 
+func UpdateFileMetadata(cli FileServerClient, fileMeta *FileMetadata, masterKey MasterKey) error {
+	metaBytes, err := proto.Marshal(fileMeta)
+	if err != nil {
+		return err
+	}
+
+	zstdEncoder, err := zstd.NewWriter(nil)
+	if err != nil {
+		return err
+	}
+	defer zstdEncoder.Close()
+
+	compressedMetaBytes := zstdEncoder.EncodeAll(metaBytes, nil)
+
+	uuid, err := uuid.Parse(fileMeta.Id)
+	if err != nil {
+		return err
+	}
+	nonce := make([]byte, 24)
+	copy(nonce, uuid[:])
+
+	newKeyBytes := masterKey[:]
+	newKeyBytes = append(newKeyBytes, uuid[:]...)
+	fileKey := blake3.Sum256(newKeyBytes)
+
+	enc, err := chacha20poly1305.NewX(fileKey[:])
+	if err != nil {
+		return err
+	}
+
+	encryptedMetaBytes := enc.Seal(nil, nonce, compressedMetaBytes, nil)
+
+	query := FileServerMessage_UpdateFileMetadata_{
+		UpdateFileMetadata: &FileServerMessage_UpdateFileMetadata{
+			EncryptedFileMetadata: &EncryptedFileMetadata{
+				Metadata: encryptedMetaBytes,
+				Id:       uuid.String(),
+			},
+		},
+	}
+	updateFileMetadataResponse := UpdateFileMetadataResp{}
+	err = cli.SendFileServerMessage(&query, &updateFileMetadataResponse)
+	if err != nil {
+		return err
+	}
+
+	if updateFileMetadataResponse.Err != nil {
+		return errors.New(*updateFileMetadataResponse.Err)
+	}
+
+	return nil
+}
+
 func UploadChunk(cli FileServerClient, chunkMetadata *ChunkMetadata, fileUUIDStr string, encryptedCompressedChunkBytes EncryptedCompressedChunk, masterKey MasterKey) error {
 	compressedEncryptedMetaBytes, err := CompressEncryptChunkMetadata(chunkMetadata, fileUUIDStr, masterKey)
 	if err != nil {
